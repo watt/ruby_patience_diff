@@ -15,7 +15,7 @@ module PatienceDiff
         when :equal
           b[right_start..right_end].map { |line| ' ' + line }
         when :delete
-          a[left_start..left_end].map { |line| '-' + line }
+          a[left_start..left_end].map   { |line| '-' + line }
         when :insert
           b[right_start..right_end].map { |line| '+' + line }
         end.tap do |opcode_lines|
@@ -24,15 +24,30 @@ module PatienceDiff
       end
       lines
     end
+    
+    # todo
+    def grouped_opcodes(a, b)
+      groups = []
+      diff_opcodes(a, b).each do |(code, left_start, left_end, right_start, right_end)|
+        case code
+        when :equal
+          b[right_start..right_end].map { |line| ' ' + line }
+        when :delete
+          a[left_start..left_end].map   { |line| '-' + line }
+        when :insert
+          b[right_start..right_end].map { |line| '+' + line }
+        end.tap do |opcode_lines|
+          lines.concat opcode_lines
+        end
+      end
+    end
   
     def diff_opcodes(a, b)
-      common = []
-      recurse_matches(a, b, 0, 0, a.length, b.length, common)
-      left_pos = right_pos = 0
-      opcodes = []
-      sequences = collapse_sequences(common)
+      sequences = collapse_matches(match(a, b))
       sequences << [a.length, b.length, 0]
   
+      left_pos = right_pos = 0
+      opcodes = []
       sequences.each do |(i, j, len)|
         if left_pos < i
           opcodes << [:delete, left_pos, i-1, right_pos, right_pos]
@@ -46,8 +61,8 @@ module PatienceDiff
         left_pos = i+len
         right_pos = j+len
       end
-      puts "opcodes:"
-      print_tuples(opcodes)
+      #puts "opcodes:"
+      #print_tuples(opcodes)
       opcodes
     end
       
@@ -58,9 +73,17 @@ module PatienceDiff
       end.join(", "))
     end
 
-    def recurse_matches(a, b, a_lo, b_lo, a_hi, b_hi, answer = [])
+    def match(a, b)
+      matches = []
+      recursively_match(a, b, 0, 0, a.length, b.length) do |match|
+        matches << match
+      end
+      matches
+    end
+    
+    def recursively_match(a, b, a_lo, b_lo, a_hi, b_hi)
       return if a_lo == a_hi or b_lo == b_hi
-      old_answer_length = answer.length
+
       last_a_pos = a_lo - 1
       last_b_pos = b_lo - 1
       
@@ -69,26 +92,26 @@ module PatienceDiff
         a_pos += a_lo
         b_pos += b_lo
         if (last_a_pos+1 != a_pos) or (last_b_pos+1 != b_pos)
-          recurse_matches(a, b, last_a_pos+1, last_b_pos+1, a_pos, b_pos, answer)
+          recursively_match(a, b, last_a_pos+1, last_b_pos+1, a_pos, b_pos) { |match| yield match }
         end
         last_a_pos = a_pos
         last_b_pos = b_pos
-        answer << [a_pos, b_pos]
+        yield [a_pos, b_pos]
       end
       
-      if answer.length > old_answer_length
+      if last_a_pos >= a_lo or last_b_pos >= b_lo
         # there was at least one match
         # recurse between last match and end
-        recurse_matches(a, b, last_a_pos+1, last_b_pos+1, a_hi, b_hi, answer)
+        recursively_match(a, b, last_a_pos+1, last_b_pos+1, a_hi, b_hi) { |match| yield match }
       elsif a[a_lo] == b[b_lo]
         # no unique lines
         # diff forward from beginning
         while a_lo < a_hi and b_lo < b_hi and a[a_lo] == b[b_lo]
-          answer << [a_lo, b_lo]
+          yield [a_lo, b_lo]
           a_lo += 1
           b_lo += 1
         end
-        recurse_matches(a, b, a_lo, b_lo, a_hi, b_hi, answer)
+        recursively_match(a, b, a_lo, b_lo, a_hi, b_hi) { |match| yield match }
       elsif a[a_hi-1] == b[b_hi-1]
         # no unique lines
         # diff back from end
@@ -98,32 +121,30 @@ module PatienceDiff
           a_mid -= 1
           b_mid -= 1
         end
-        puts "last_a_pos doesn't match a_lo-1" if last_a_pos != a_lo-1
-        puts "last_b_pos doesn't match b_lo-1" if last_b_pos != b_lo-1
-        recurse_matches(a, b, a_lo, b_lo, a_mid, b_mid, answer)
+        recursively_match(a, b, a_lo, b_lo, a_mid, b_mid) { |match| yield match }
         0...(a_hi-a_mid).each do |i|
-          answer << [a_mid+i, b_mid+i]
+          yield [a_mid+i, b_mid+i]
         end
       end
     end
     
-    def collapse_sequences(matches)
-      return matches if matches.empty?
-      answer = []
+    def collapse_matches(matches)
+      return [] if matches.empty?
+      sequences = []
       start_a, start_b = *(matches.first)
       len = 1
       matches[1..-1].each do |(i_a, i_b)|
         if i_a == start_a + len and i_b == start_b + len
           len += 1
         else
-          answer << [start_a, start_b, len]
+          sequences << [start_a, start_b, len]
           start_a = i_a
           start_b = i_b
           len = 1
         end
       end
-      answer << [start_a, start_b, len]
-      answer
+      sequences << [start_a, start_b, len]
+      sequences
     end
   
     def longest_unique_subsequence(a, b)
@@ -152,10 +173,6 @@ module PatienceDiff
         end
       end
       
-      longest_increasing_subsequence(deck)
-    end
-  
-    def longest_increasing_subsequence(deck)
       card = patience_sort(deck).last
       result = []
       while card
@@ -195,8 +212,9 @@ module PatienceDiff
       piles
     end
     
-    def bisect(piles, target, low=0, high=nil)
-      high = piles.size-1 unless high
+    def bisect(piles, target)
+      low = 0
+      high = piles.size - 1
       while (low <= high)
         mid = (low + high)/2
         if piles[mid].value < target
