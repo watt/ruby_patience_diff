@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+lib_path = File.expand_path(File.join(File.dirname(__FILE__),"..","lib"))
+$LOAD_PATH.unshift(lib_path)
+require 'patience_diff'
+
+debugging = false
+
+begin
+  raise PatienceDiff::UsageError unless ARGV.length == 2
+  
+  left_file, right_file = *ARGV
+  
+  left = File.read(left_file).split("\n")
+  right = File.read(right_file).split("\n")
+  
+  diff = PatienceDiff::Differ.new
+  puts diff.unified_diff(left, right).join("\n")
+  
+rescue PatienceDiff::UsageError => e
+  e.print_usage
+rescue StandardError => e
+  if debugging
+    raise
+  else
+    $stderr.puts "Error: #{e}"
+  end
+end
