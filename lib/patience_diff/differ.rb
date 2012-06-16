@@ -7,72 +7,55 @@ module PatienceDiff
     def initialize(opts = {})
       @context = opts[:context] || 3
     end
-    
-    def unified_diff(a, b)
-      lines = []
-      diff_opcodes(a, b).each do |(code, left_start, left_end, right_start, right_end)|
-        case code
-        when :equal
-          b[right_start..right_end].map { |line| ' ' + line }
-        when :delete
-          a[left_start..left_end].map   { |line| '-' + line }
-        when :insert
-          b[right_start..right_end].map { |line| '+' + line }
-        end.tap do |opcode_lines|
-          lines.concat opcode_lines
-        end
-      end
-      lines
-    end
-    
-    # todo
+        
     def grouped_opcodes(a, b)
       groups = []
-      diff_opcodes(a, b).each do |(code, left_start, left_end, right_start, right_end)|
-        case code
-        when :equal
-          b[right_start..right_end].map { |line| ' ' + line }
-        when :delete
-          a[left_start..left_end].map   { |line| '-' + line }
-        when :insert
-          b[right_start..right_end].map { |line| '+' + line }
-        end.tap do |opcode_lines|
-          lines.concat opcode_lines
+      last_group = []
+      diff_opcodes(a, b).each do |opcode|
+        if opcode[0] == :equal
+          next if @context.zero?
+          code, a_start, a_end, b_start, b_end = *opcode
+          if (b_end - b_start + 1) > (@context * 2)
+            last_group << [code, a_start, @context, b_start, @context]
+            groups << last_group
+            opcode = [
+              code, 
+              a_end - @context + 1,
+              a_end,
+              b_end - @context + 1,
+              b_end
+            ]
+          end
         end
+        last_group << opcode
       end
+      groups << last_group unless last_group.empty?
+      groups
     end
   
     def diff_opcodes(a, b)
       sequences = collapse_matches(match(a, b))
       sequences << [a.length, b.length, 0]
   
-      left_pos = right_pos = 0
+      a_pos = b_pos = 0
       opcodes = []
       sequences.each do |(i, j, len)|
-        if left_pos < i
-          opcodes << [:delete, left_pos, i-1, right_pos, right_pos]
+        if a_pos < i
+          opcodes << [:delete, a_pos, i-1, b_pos, b_pos]
         end
-        if right_pos < j
-          opcodes << [:insert, left_pos, left_pos, right_pos, j-1]
+        if b_pos < j
+          opcodes << [:insert, a_pos, a_pos, b_pos, j-1]
         end
         if len > 0
           opcodes << [:equal, i, i+len-1, j, j+len-1]
         end
-        left_pos = i+len
-        right_pos = j+len
+        a_pos = i+len
+        b_pos = j+len
       end
-      #puts "opcodes:"
-      #print_tuples(opcodes)
       opcodes
     end
       
     private
-    def print_tuples(array)
-      puts(array.map do |tuple|
-        "[#{tuple.join(", ")}]"
-      end.join(", "))
-    end
-
     def match(a, b)
       matches = []
       recursively_match(a, b, 0, 0, a.length, b.length) do |match|

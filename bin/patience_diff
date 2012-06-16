@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+require 'english'
 
 lib_path = File.expand_path(File.join(File.dirname(__FILE__),"..","lib"))
 $LOAD_PATH.unshift(lib_path)
@@ -11,11 +12,13 @@ begin
   
   left_file, right_file = *ARGV
   
-  left = File.read(left_file).split("\n")
-  right = File.read(right_file).split("\n")
+  left = File.read(left_file).split($RS)
+  left_timestamp = File.mtime(left_file)
+  right = File.read(right_file).split($RS)
+  right_timestamp = File.mtime(right_file)
   
-  diff = PatienceDiff::Differ.new
-  puts diff.unified_diff(left, right).join("\n")
+  formatter = PatienceDiff::TextFormat.new
+  puts formatter.unified_diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
   
 rescue PatienceDiff::UsageError => e
   e.print_usage
