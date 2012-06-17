@@ -1,0 +1,10 @@
+History.txt
+Manifest.txt
+README.md
+Rakefile
+bin/patience_diff
+lib/patience_diff.rb
+lib/patience_diff/card.rb
+lib/patience_diff/differ.rb
+lib/patience_diff/text_format.rb
+lib/patience_diff/usage_error.rb
