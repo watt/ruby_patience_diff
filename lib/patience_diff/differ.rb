@@ -2,14 +2,16 @@ require 'patience_diff/card'
 
 module PatienceDiff
   
-  # test 1
   class Differ
     attr_accessor :context
     
     def initialize(opts = {})
       @context = opts[:context] || 3
     end
-        
+    
+    # Generate a diff of a and b using #diff_opcodes, and split the opcode into groups
+    # whenever an :equal range is encountered that is longer than @context * 2.
+    # Returns an array of arrays of 5-tuples as described for #diff_opcodes.
     def grouped_opcodes(a, b)
       groups = []
       last_group = []
@@ -34,7 +36,24 @@ module PatienceDiff
       groups << last_group unless last_group.empty?
       groups
     end
-  
+    
+    # Generate a diff of a and b, and return an array of opcodes describing that diff.
+    # Each opcode represents a range in a and b that is either equal, only in a,
+    # or only in b. Opcodes are 5-tuples, in the format:
+    #   0: code
+    #      A symbol indicating the diff operation. Can be :equal, :delete, or :insert.
+    #   1: a_start
+    #      Index in a where the range begins
+    #   2: a_end
+    #      Index in a where the range ends.
+    #   3: b_start
+    #      Index in b where the range begins
+    #   4: b_end
+    #      Index in b where the range ends.
+    #
+    # For :equal, (a_end - a_start) == (b_end - b_start).
+    # For :delete, a_start == a_end.
+    # For :insert, b_start == b_end.
     def diff_opcodes(a, b)
       sequences = collapse_matches(match(a, b))
       sequences << [a.length, b.length, 0]
