@@ -16,11 +16,32 @@ module PatienceDiff
       last_group = []
       diff_opcodes(a, b).each do |opcode|
         if opcode[0] == :equal
-          next if @context.zero?
-          code, a_start, a_end, b_start, b_end = *opcode
-          if (b_end - b_start + 1) > (@context * 2)
-            last_group << [code, a_start, @context, b_start, @context]
+          if @context.zero?
             groups << last_group
+            last_group = []
+            next
+          end
+          
+          code, a_start, a_end, b_start, b_end = *opcode
+          
+          if (a_start.zero? and b_start.zero?) or (a_end == a.length-1 and b_end == b.length-1)
+            threshold = @context
+          else
+            threshold = @context * 2
+          end
+          
+          if (b_end - b_start + 1) > threshold
+            unless last_group.empty?
+              last_group << [
+                code,
+                a_start,
+                a_start + @context - 1,
+                b_start,
+                b_start + @context - 1
+              ]
+              groups << last_group
+              last_group = []
+            end
             opcode = [
               code, 
               a_end - @context + 1,
@@ -32,7 +53,7 @@ module PatienceDiff
         end
         last_group << opcode
       end
-      groups << last_group unless last_group.empty?
+      groups << last_group unless last_group.one? and last_group.first[0] == :equal
       groups
     end
     
