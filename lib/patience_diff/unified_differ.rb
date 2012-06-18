@@ -1,7 +1,7 @@
 require 'English'
 
 module PatienceDiff
-  class TextFormat
+  class UnifiedDiffer
     attr_reader :differ
     attr_accessor :no_grouping, :line_ending
     alias :no_grouping? :no_grouping
@@ -9,10 +9,10 @@ module PatienceDiff
     def initialize(opts = {})
       @no_grouping = opts.delete(:no_grouping)
       @line_ending = opts.delete(:line_ending) || $RS
-      @differ = Differ.new(opts)
+      @differ = SequenceMatcher.new(opts)
     end
 
-    def unified_diff(left, right, left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
+    def diff(left, right, left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
       left_name ||= "Original"
       right_name ||= "Current"
       left_timestamp ||= right_timestamp || Time.now

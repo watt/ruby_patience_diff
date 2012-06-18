@@ -1,8 +1,7 @@
 require 'patience_diff/card'
 
 module PatienceDiff
-  
-  class Differ
+  class SequenceMatcher
     attr_accessor :context
     
     def initialize(opts = {})
