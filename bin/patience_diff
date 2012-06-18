@@ -1,29 +1,42 @@
 #!/usr/bin/env ruby
 require 'English'
+require 'trollop'
 
 lib_path = File.expand_path(File.join(File.dirname(__FILE__),"..","lib"))
 $LOAD_PATH.unshift(lib_path)
 require 'patience_diff'
 
-debugging = true
-
 begin
+  opts = Trollop::options do
+    banner <<-EOF
+Usage: #{File.basename($0)} [options] left-file right-file
+Options:
+EOF
+    version "patience_diff #{PatienceDiff::VERSION}"
+    opt :debug, "Debugging mode"
+    opt :context, "Lines of context", :default => 3
+    opt :full_context, "Don't collapse common sections; output entire files"
+  end
+  
   raise PatienceDiff::UsageError unless ARGV.length == 2
   
   left_file, right_file = *ARGV
   
-  left = File.read(left_file).split($RS)
+  left = File.read(left_file, :external_encoding => Encoding::BINARY).split($RS)
   left_timestamp = File.mtime(left_file)
-  right = File.read(right_file).split($RS)
+  right = File.read(right_file, :external_encoding => Encoding::BINARY).split($RS)
   right_timestamp = File.mtime(right_file)
   
-  formatter = PatienceDiff::UnifiedDiffer.new
+  opts[:no_grouping] = opts[:full_context]
+  formatter = PatienceDiff::UnifiedDiffer.new(opts)
   puts formatter.diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
   
 rescue PatienceDiff::UsageError => e
-  e.print_usage
+  Trollop.module_eval do
+    @last_parser.educate($stderr)
+  end
 rescue StandardError => e
-  if debugging
+  if opts[:debug]
     raise
   else
     $stderr.puts "Error: #{e}"
