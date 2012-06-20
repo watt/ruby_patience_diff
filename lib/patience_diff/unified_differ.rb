@@ -2,14 +2,14 @@ require 'English'
 
 module PatienceDiff
   class UnifiedDiffer
-    attr_reader :differ
-    attr_accessor :no_grouping, :line_ending
-    alias :no_grouping? :no_grouping
+    attr_reader :matcher
+    attr_accessor :no_grouping, :line_ending, :ignore_whitespace
     
     def initialize(opts = {})
       @no_grouping = opts.delete(:no_grouping)
       @line_ending = opts.delete(:line_ending) || $RS
-      @differ = SequenceMatcher.new(opts)
+      @ignore_whitespace = opts.delete(:ignore_whitespace)
+      @matcher = SequenceMatcher.new(opts)
     end
 
     def diff(left, right, left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
@@ -17,10 +17,20 @@ module PatienceDiff
       right_name ||= "Current"
       left_timestamp ||= right_timestamp || Time.now
       right_timestamp ||= left_timestamp || Time.now
-      if @no_grouping
-        groups = [@differ.diff_opcodes(left, right)]
+      
+      if @ignore_whitespace
+        puts "ignoring whitespace"
+        a = left.map  { |line| line.rstrip.gsub(/^\s+/, ' ') }
+        b = right.map { |line| line.rstrip.gsub(/^\s+/, ' ') }
       else
-        groups = @differ.grouped_opcodes(left, right)
+        a = left
+        b = right
+      end
+      
+      if @no_grouping
+        groups = [@matcher.diff_opcodes(a, b)]
+      else
+        groups = @matcher.grouped_opcodes(a, b)
       end
       [
         "--- %s\t%s" % [left_name, left_timestamp.strftime("%Y-%m-%d %H:%m:%S.%N %z")],
@@ -45,7 +55,7 @@ module PatienceDiff
         when :equal
           b[b_start..b_end].map { |line| ' ' + line }
         when :delete
-          a[a_start..a_end].map   { |line| '-' + line }
+          a[a_start..a_end].map { |line| '-' + line }
         when :insert
           b[b_start..b_end].map { |line| '+' + line }
         end
