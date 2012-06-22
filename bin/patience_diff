@@ -26,9 +26,9 @@ EOF
   
   formatter = case opts[:format]
     when 'text'
-      PatienceDiff::UnifiedDiffer
+      PatienceDiff::Differs::Unified
     when 'html'
-      PatienceDiff::HtmlDiffer
+      PatienceDiff::Differs::Html
     else
       raise PatienceDiff::UsageError
     end.new(opts)

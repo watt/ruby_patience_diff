@@ -1,8 +1,8 @@
-require 'patience_diff/card'
-
 module PatienceDiff
   class SequenceMatcher
     attr_accessor :context
+    
+    Card = Struct.new(:index, :value, :previous)
     
     def initialize(opts = {})
       @context = opts[:context] || 3
