@@ -24,7 +24,7 @@ EOF
   
   raise PatienceDiff::UsageError unless ARGV.length and ARGV.length % 2 == 0
   
-  formatter = case opts[:format]
+  differ = case opts[:format]
     when 'text'
       PatienceDiff::Differs::Unified
     when 'html'
@@ -33,13 +33,15 @@ EOF
       raise PatienceDiff::UsageError
     end.new(opts)
   
-  ARGV.each_slice(2) do |(left_file, right_file)|
-    left = File.read(left_file, :external_encoding => Encoding::BINARY).split($RS)
-    left_timestamp = File.mtime(left_file)
-    right = File.read(right_file, :external_encoding => Encoding::BINARY).split($RS)
-    right_timestamp = File.mtime(right_file)
-    
-    puts formatter.diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
+  differ.format do
+    ARGV.each_slice(2) do |(left_file, right_file)|
+      left = File.read(left_file, :external_encoding => Encoding::BINARY).split($RS)
+      left_timestamp = File.mtime(left_file)
+      right = File.read(right_file, :external_encoding => Encoding::BINARY).split($RS)
+      right_timestamp = File.mtime(right_file)
+      
+      puts differ.diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
+    end
   end
   
 rescue PatienceDiff::UsageError => e
