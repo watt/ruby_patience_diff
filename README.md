@@ -15,11 +15,25 @@ Patience diff was originally written by Bram Cohen and is used in the [Bazaar][b
 
 ## INSTALL:
 
-    $ gem install patiencediff
+    $ gem install patience_diff
 
 ## USAGE:
 
-    patience_diff file-a file-b
+### Command line:
+
+    $ patience_diff [options] file-a file-b
+
+Run with `--help` to see available options.
+
+### Programmatically:
+
+    left = File.read("/path/to/old").split($RS)
+    left_timestamp = File.mtime("/path/to/old")
+    right = File.read("/path/to/new").split($RS)
+    right_timestamp = File.mtime("/path/to/new")
+
+    differ = PatienceDiff::UnifiedDiffer.new(:context => 10)
+    puts differ.diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
 
 ## LICENSE:
 
