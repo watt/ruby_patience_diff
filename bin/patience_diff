@@ -9,30 +9,38 @@ require 'patience_diff'
 begin
   opts = Trollop::options do
     banner <<-EOF
-Usage: #{File.basename($0)} [options] left-file right-file
+Usage: #{File.basename($0)} [options] left-file right-file (left-file-2 right-file-2 ...)
 Options:
 EOF
     version "patience_diff #{PatienceDiff::VERSION}"
     opt :debug, "Debugging mode"
     opt :context, "Lines of context", :default => 3
-    opt :full_context, "Don't collapse common sections; output entire files"
+    opt :all_context, "Don't collapse common sections; output entire files. Ignored in html format."
+    opt :format, "Specify output format. Currently 'text' and 'html' are supported.", :default => "text"
     opt :ignore_whitespace, 
       "Ignore trailing whitespace, and treat leading whitespace as either present or not. This switch is for compatibility with diff's -b option.",
       :short => '-b'
   end
   
-  raise PatienceDiff::UsageError unless ARGV.length == 2
+  raise PatienceDiff::UsageError unless ARGV.length and ARGV.length % 2 == 0
   
-  left_file, right_file = *ARGV
+  formatter = case opts[:format]
+    when 'text'
+      PatienceDiff::UnifiedDiffer
+    when 'html'
+      PatienceDiff::HtmlDiffer
+    else
+      raise PatienceDiff::UsageError
+    end.new(opts)
   
-  left = File.read(left_file, :external_encoding => Encoding::BINARY).split($RS)
-  left_timestamp = File.mtime(left_file)
-  right = File.read(right_file, :external_encoding => Encoding::BINARY).split($RS)
-  right_timestamp = File.mtime(right_file)
-  
-  opts[:no_grouping] = opts[:full_context]
-  formatter = PatienceDiff::UnifiedDiffer.new(opts)
-  puts formatter.diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
+  ARGV.each_slice(2) do |(left_file, right_file)|
+    left = File.read(left_file, :external_encoding => Encoding::BINARY).split($RS)
+    left_timestamp = File.mtime(left_file)
+    right = File.read(right_file, :external_encoding => Encoding::BINARY).split($RS)
+    right_timestamp = File.mtime(right_file)
+    
+    puts formatter.diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
+  end
   
 rescue PatienceDiff::UsageError => e
   Trollop.module_eval do

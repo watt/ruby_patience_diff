@@ -3,10 +3,10 @@ require 'English'
 module PatienceDiff
   class UnifiedDiffer
     attr_reader :matcher
-    attr_accessor :no_grouping, :line_ending, :ignore_whitespace
+    attr_accessor :all_context, :line_ending, :ignore_whitespace
     
     def initialize(opts = {})
-      @no_grouping = opts.delete(:no_grouping)
+      @all_context = opts.delete(:all_context)
       @line_ending = opts.delete(:line_ending) || $RS
       @ignore_whitespace = opts.delete(:ignore_whitespace)
       @matcher = SequenceMatcher.new(opts)
@@ -27,7 +27,7 @@ module PatienceDiff
         b = right
       end
       
-      if @no_grouping
+      if @all_context
         groups = [@matcher.diff_opcodes(a, b)]
       else
         groups = @matcher.grouped_opcodes(a, b)
