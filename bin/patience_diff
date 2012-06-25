@@ -8,11 +8,13 @@ require 'patience_diff'
 
 begin
   opts = Trollop::options do
-    banner <<-EOF
-Usage: #{File.basename($0)} [options] left-file right-file (left-file-2 right-file-2 ...)
-Options:
-EOF
+    banner <<-EOF.gsub(/^\s*/, '')
+      Usage: #{File.basename($0)} [options] left-file right-file (left-file-2 right-file-2 ...)
+      Options:
+    EOF
+    
     version "patience_diff #{PatienceDiff::VERSION}"
+    
     opt :debug, "Debugging mode"
     opt :context, "Lines of context", :default => 3
     opt :all_context, "Don't collapse common sections; output entire files. Ignored in html format."
@@ -35,6 +37,7 @@ EOF
   
   differ.format do |formatter|
     ARGV.each_slice(2) do |(left_file, right_file)|
+      # Read in binary encoding, so that we can diff any encoding and split() won't complain
       left = File.read(left_file, :external_encoding => Encoding::BINARY).split($RS)
       left_timestamp = File.mtime(left_file)
       right = File.read(right_file, :external_encoding => Encoding::BINARY).split($RS)

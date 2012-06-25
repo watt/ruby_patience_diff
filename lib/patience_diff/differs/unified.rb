@@ -3,8 +3,11 @@ require 'patience_diff/sequence_matcher'
 
 module PatienceDiff
   module Differs
+    
+    # Produces plaintext unified diffs.
     class Unified
       
+      # Delegate object returned by the #format method.
       class Formatter
         def initialize(differ)
           @differ = differ
@@ -17,6 +20,11 @@ module PatienceDiff
       attr_reader :matcher
       attr_accessor :all_context, :line_ending, :ignore_whitespace
       
+      # Options:
+      #   * :all_context: Output the entirety of each file. This overrides the sequence matcher's context setting.
+      #   * :line_ending: Delimiter to use when joining diff output. Defaults to $RS.
+      #   * :ignore_whitespace: Before comparing lines, strip trailing whitespace, and treat leading whitespace as either present or not. Does not affect output.
+      # Any additional options (e.g. :context) are passed on to the sequence matcher.
       def initialize(opts = {})
         @all_context = opts.delete(:all_context)
         @line_ending = opts.delete(:line_ending) || $RS
@@ -24,10 +32,14 @@ module PatienceDiff
         @matcher = SequenceMatcher.new(opts)
       end
       
+      # Produce a multi-file formatted diff.
+      # Yields a delegate object, on which you should call #diff on for each set of files you want in the formatted diff.
       def format
         yield Formatter.new(self)
       end
       
+      # Diff 2 files.
+      # File names and timestamps do not affect the diff algorithm, but are used in the header text.
       def diff(left, right, left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
         if @ignore_whitespace
           a = left.map  { |line| line.rstrip.gsub(/^\s+/, ' ') }

@@ -1,9 +1,12 @@
 module PatienceDiff
+  # Matches indexed data (generally text) using the Patience diff algorithm.
   class SequenceMatcher
     attr_accessor :context
     
     Card = Struct.new(:index, :value, :previous)
     
+    # Options:
+    #   * :context: number of lines of context to use when grouping
     def initialize(opts = {})
       @context = opts[:context] || 3
     end
