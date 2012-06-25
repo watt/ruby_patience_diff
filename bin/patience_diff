@@ -33,14 +33,14 @@ EOF
       raise PatienceDiff::UsageError
     end.new(opts)
   
-  differ.format do
+  differ.format do |formatter|
     ARGV.each_slice(2) do |(left_file, right_file)|
       left = File.read(left_file, :external_encoding => Encoding::BINARY).split($RS)
       left_timestamp = File.mtime(left_file)
       right = File.read(right_file, :external_encoding => Encoding::BINARY).split($RS)
       right_timestamp = File.mtime(right_file)
       
-      puts differ.diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
+      formatter.diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
     end
   end
   

@@ -1,13 +1,31 @@
-require 'patience_diff/differs/base'
+require 'English'
+require 'patience_diff/sequence_matcher'
 
 module PatienceDiff
   module Differs
-    class Unified < Base
+    class Unified
+      
+      class Formatter
+        def initialize(differ)
+          @differ = differ
+        end
+        def diff(*args)
+          puts @differ.diff(*args)
+        end
+      end
+      
+      attr_reader :matcher
       attr_accessor :all_context, :line_ending, :ignore_whitespace
       
       def initialize(opts = {})
         @all_context = opts.delete(:all_context)
-        super(opts)
+        @line_ending = opts.delete(:line_ending) || $RS
+        @ignore_whitespace = opts.delete(:ignore_whitespace)
+        @matcher = SequenceMatcher.new(opts)
+      end
+      
+      def format
+        yield Formatter.new(self)
       end
       
       def diff(left, right, left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
@@ -25,14 +43,32 @@ module PatienceDiff
           groups = @matcher.grouped_opcodes(a, b)
         end
         
-        [
-          header(left_name, right_name, left_timestamp, right_timestamp),
-          groups.collect { |group| unified_diff_group(left, right, group) }
-        ].flatten.compact.join(@line_ending)
+        lines = header
+        last_shown_line = -1
+        groups.each do |group|
+          b_start = group.first[3]
+          if b_start - last_shown_line > 1
+            lines << render_collapsed(b, last_shown_line + 1, b_start - 1)
+          end
+          last_shown_line = group.last[4]
+          lines << render_diff_group(a, b, group)
+        end
+        lines.flatten.compact.join(@line_ending)
       end
-
+      
       private
-      def unified_diff_group(a, b, opcodes)
+      def header(left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
+        left_name ||= "Original"
+        right_name ||= "Current"
+        left_timestamp ||= right_timestamp || Time.now
+        right_timestamp ||= left_timestamp || Time.now
+        [
+          "--- %s\t%s" % [left_name, left_timestamp.strftime("%Y-%m-%d %H:%m:%S.%N %z")],
+          "+++ %s\t%s" % [right_name, right_timestamp.strftime("%Y-%m-%d %H:%m:%S.%N %z")]
+        ]
+      end
+      
+      def render_diff_group(a, b, opcodes)
         return nil if opcodes.empty?
         
         a_start = opcodes.first[1] + 1
@@ -45,14 +81,22 @@ module PatienceDiff
         lines << opcodes.collect do |(code, a_start, a_end, b_start, b_end)|
           case code
           when :equal
-            b[b_start..b_end].map { |line| ' ' + line }
+            b[b_start..b_end].map { |line| process_line(' ' + line, code) }
           when :delete
-            a[a_start..a_end].map { |line| '-' + line }
+            a[a_start..a_end].map { |line| process_line('-' + line, code) }
           when :insert
-            b[b_start..b_end].map { |line| '+' + line }
+            b[b_start..b_end].map { |line| process_line('+' + line, code) }
           end
         end
         lines
+      end
+      
+      def process_line(line, code)
+        line
+      end
+      
+      def render_collapsed(lines, first_line, last_line)
+        nil
       end
     end
   end
