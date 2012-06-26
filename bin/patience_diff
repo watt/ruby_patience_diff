@@ -45,6 +45,8 @@ begin
       
       formatter.diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
     end
+  end.tap do |result|
+    puts result
   end
   
 rescue PatienceDiff::UsageError => e

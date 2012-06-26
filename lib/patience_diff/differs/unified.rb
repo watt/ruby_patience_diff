@@ -13,7 +13,7 @@ module PatienceDiff
           @differ = differ
         end
         def diff(*args)
-          puts @differ.diff(*args)
+          @differ.diff(*args)
         end
       end
       

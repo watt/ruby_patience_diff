@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title><%= title %></title>
+  <style>
+  pre        { font-family: Consolas; font-size: 8pt; }
+  .delete    { background-color: #FFCDCD; }
+  .insert    { background-color: #CDFFCD; }
+  .ref { 
+    background-color: #CDE6FF; 
+    color: #000080; 
+    font-weight: bold; 
+    font-size: 11pt; 
+    margin: 0.5em 0;
+  }
+  .ref span { color: #000080; }
+  .header_old {
+    background-color: #CDE6FF; 
+    color: #000080; 
+    font-weight: bold; 
+    page-break-before: always;
+  }
+  .header_new {
+    background-color: #CDE6FF; 
+    color: #000080; 
+    font-weight: bold; 
+  }
+  #toc_container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    max-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  #toc {
+    border-left: solid black 1px;
+    border-bottom: solid black 1px;
+    border-bottom-left-radius: 5px;
+    
+    background: #f8fff8;
+    background-image: -moz-linear-gradient(left, #f8fff8 0%, #efe 100%);
+    background-image: -webkit-linear-gradient(left, #f8fff8 0%, #efe 100%);
+    background-image: linear-gradient(left, #f8fff8 0%, #efe 100%);
+    
+    font-family: Calibri;
+    font-size: 10pt;
+    padding: 1em 2em 1em 1em;
+  }
+  #toc ol      { margin: 0; padding: 0 0 0 30px; }
+  #toc a       { color: black; text-decoration: none; display: block; width: 100%; }
+  #toc a:hover { color: gray; }
+  .toc_control {
+    text-align: right;
+  }
+  .toc_control button {
+    font-family: Calibri;
+    font-size: 10pt;
+  }
+  .toc_seethru       { opacity: 0.33; }
+  .toc_seethru:hover { opacity: 1; }
+  </style>
+  <script>
+  function init() {
+    document.getElementById("toc_hide").onclick = page.hideNav;
+    document.getElementById("toc_show").onclick = page.showNav;
+    var jumps = document.getElementById("toc_list").getElementsByTagName("a")
+    for (var i = 0, len = jumps.length; i < len; i++) {
+      var id = "diff_"+i;
+      jumps[i].onclick = function() {
+        page.jump(id);
+        return false;
+      }
+    }
+  }
+  function show(id) {
+    var el = document.getElementById(id);
+    if (el.tagName.toLowerCase() == "button") {
+      el.style.display = "inline-block";
+    } else {
+      el.style.display = "block";
+    }
+  }
+  function hide(id) {
+    document.getElementById(id).style.display = "none";
+  }
+  page = {
+    hideNav: function() {
+      hide("toc_list");
+      hide("toc_hide");
+      show("toc_show");
+      document.getElementById("toc").className = "toc_seethru";
+    },
+    showNav: function() {
+      hide("toc_show");
+      show("toc_list");
+      show("toc_hide");
+      document.getElementById("toc").className = "";
+    },
+    jump: function(id) {
+      scrollTo(0,document.getElementById(id).offsetTop);
+    }
+  }
+  </script>
+</head>
+<body>
+  <pre><%= content %></pre>
+  <% if files.count > 1 %>
+  <div id="toc_container"><div id="toc">
+    <div class="toc_control"><button id="toc_hide">Hide navigation &raquo;</button></div>
+    <div class="toc_control"><button id="toc_show" style="display: none">&laquo; Show navigation</button></div>
+    <ol id="toc_list">
+    <% files.each_with_index do |file, i| %>
+      <li><a href="#diff_<%= i %>"><%= file %></a></li>
+    <% end %>
+    </ol>
+  </div></div>
+  <% end %>
+</body>
+</html>
