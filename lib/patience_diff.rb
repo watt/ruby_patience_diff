@@ -5,4 +5,5 @@ PatienceDiff::Differs.autoload(:Html, 'patience_diff/differs/html')
 
 module PatienceDiff
   VERSION = "1.0.1"
+  TEMPLATE_PATH = File.expand_path(File.join(File.dirname(__FILE__),'..','templates'))
 end

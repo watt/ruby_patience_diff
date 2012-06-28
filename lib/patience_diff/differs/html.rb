@@ -38,7 +38,7 @@ module PatienceDiff
         
         formatter = Formatter.new(self)
         yield formatter
-        render(formatter.files, formatter.to_s)
+        render(formatter)
       end
             
       private
@@ -58,8 +58,8 @@ module PatienceDiff
         File.join(PatienceDiff::TEMPLATE_PATH, 'html.erb')
       end
       
-      def render(files, content)
-        @erb ||= Erubis:Eruby.new(File.read(template))
+      def render(formatter)
+        @erb ||= Erubis::Eruby.new(File.read(template))
         @erb.evaluate(formatter)
       end
     end
