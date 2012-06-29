@@ -42,12 +42,44 @@ module PatienceDiff
       end
             
       private
-      def render_collapsed(lines, first_line, last_line)
-        "<span>#{last_line - first_line + 1} lines collapsed</span>"
+      def render_header(*args)
+        left_header, right_header = *super(*args)
+        [
+          "<div class='left_header'>#{escape(left_header)}</div>",
+          "<div class='right_header'>#{escape(right_header)}</div>"
+        ]
+      end
+        
+      def render_group_header(b, opcodes, last_line_shown)
+        header = super(b, opcodes, last_line_shown)
+        b_start = opcodes.first[3]
+        number_hidden = b_start - last_line_shown - 1
+        if number_hidden > 0
+          [
+            "<div class='collapsed' id='collapsed_#{b_start}'><div>",
+            "<div class='divider' onclick='page.toggleCollapse(#{b_start})'>",
+            "<span class='group_header'>#{'&nbsp;' * header.length}</span>",
+            "Click to collapse #{number_hidden} lines</div>",
+            b[(last_line_shown+1)...b_start].map { |line| render_line(line, :equal) },
+            "</div></div>",
+            "<div class='divider' onclick='page.toggleCollapse(#{b_start})'>",
+            "<span class='group_header'>#{escape(header)}</span>",
+            "<span class='hint'>Click to expand #{number_hidden} lines</span></div>",
+          ]
+        else
+          "<div class='divider'><span class='group_header'>#{escape(header)}</span></div>"
+        end
       end
       
-      def process_line(line, code)
-        "<span class='#{code}'>#{escape(line)}</span>"
+      def render_line(line, code)
+        case code
+        when :equal
+          "<div class='equal'> #{escape(line)}</div>"
+        when :delete
+          "<div class='delete'>-#{escape(line)}</div>"
+        when :insert
+          "<div class='insert'>+#{escape(line)}</div>"
+        end
       end
       
       def escape(raw)

@@ -55,21 +55,18 @@ module PatienceDiff
           groups = @matcher.grouped_opcodes(a, b)
         end
         
-        lines = header
-        last_shown_line = -1
+        lines = render_header(left_name, right_name, left_timestamp, right_timestamp)
+        last_line_shown = -1
         groups.each do |group|
-          b_start = group.first[3]
-          if b_start - last_shown_line > 1
-            lines << render_collapsed(b, last_shown_line + 1, b_start - 1)
-          end
-          last_shown_line = group.last[4]
+          lines << render_group_header(b, group, last_line_shown)
           lines << render_diff_group(a, b, group)
+          last_line_shown = group.last[4]
         end
         lines.flatten.compact.join(@line_ending)
       end
       
       private
-      def header(left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
+      def render_header(left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
         left_name ||= "Original"
         right_name ||= "Current"
         left_timestamp ||= right_timestamp || Time.now
@@ -80,35 +77,34 @@ module PatienceDiff
         ]
       end
       
-      def render_diff_group(a, b, opcodes)
-        return nil if opcodes.empty?
-        
+      def render_group_header(b, opcodes, last_line_shown)
         a_start = opcodes.first[1] + 1
         a_end = opcodes.last[2] + 2
         b_start = opcodes.first[3] + 1
         b_end = opcodes.last[4] + 2
         
-        lines = ["@@ -%d,%d +%d,%d @@" % [a_start, a_end-a_start, b_start, b_end-b_start]]
-        
-        lines << opcodes.collect do |(code, a_start, a_end, b_start, b_end)|
-          case code
-          when :equal
-            b[b_start..b_end].map { |line| process_line(' ' + line, code) }
-          when :delete
-            a[a_start..a_end].map { |line| process_line('-' + line, code) }
-          when :insert
-            b[b_start..b_end].map { |line| process_line('+' + line, code) }
-          end
+        "@@ -%d,%d +%d,%d @@" % [a_start, a_end-a_start, b_start, b_end-b_start]
+      end
+      
+      def render_diff_group(a, b, opcodes)
+        opcodes.collect do |(code, a_start, a_end, b_start, b_end)|
+          if code == :delete 
+            a[a_start..a_end]
+          else
+            b[b_start..b_end]
+          end.map { |line| render_line(line, code) }
         end
-        lines
       end
       
-      def process_line(line, code)
-        line
-      end
-      
-      def render_collapsed(lines, first_line, last_line)
-        nil
+      def render_line(line, code)
+        case code
+        when :equal
+          ' ' + line
+        when :delete
+          '-' + line
+        when :insert
+          '+' + line
+        end
       end
     end
   end

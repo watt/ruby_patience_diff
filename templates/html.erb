@@ -4,27 +4,49 @@
   <meta charset="utf-8" />
   <title><%= title %></title>
   <style>
-  pre        { font-family: Consolas; font-size: 8pt; }
+  body {
+    font-family: Consolas;
+    font-size: 8pt;
+  }
+  .delete, .insert, .equal, .left_header, .right_header, .group_header {
+    white-space: pre;
+  }
   .delete    { background-color: #FFCDCD; }
   .insert    { background-color: #CDFFCD; }
-  .ref { 
-    background-color: #CDE6FF; 
+  .group_header { 
     color: #000080; 
-    font-weight: bold; 
+    font-family: Consolas;
+    /* font-weight: bold; 
     font-size: 11pt; 
-    margin: 0.5em 0;
+    margin: 0.5em 0; */
   }
-  .ref span { color: #000080; }
-  .header_old {
+  .divider {
+    background-color: #CDE6FF;
+    font-family: Calibri;
+    
+  }
+  .hint {
+    display: none;
+  }
+  .divider:hover .hint {
+    display: inline;
+  }
+  .left_header {
     background-color: #CDE6FF; 
     color: #000080; 
     font-weight: bold; 
     page-break-before: always;
   }
-  .header_new {
+  .right_header {
     background-color: #CDE6FF; 
     color: #000080; 
     font-weight: bold; 
+  }
+  .collapsed {
+    -webkit-transition: height .5s;
+    transition: height .5s;
+    height: 0;
+    overflow: hidden;
   }
   #toc_container {
     position: fixed;
@@ -100,12 +122,21 @@
     },
     jump: function(id) {
       scrollTo(0,document.getElementById(id).offsetTop);
+    },
+    toggleCollapse: function(line) {
+      var growDiv = document.getElementById("collapsed_" + line);
+      if (growDiv.clientHeight || growDiv.offsetHeight) {
+        growDiv.style.height = 0;
+      } else {
+        var wrapper = growDiv.getElementsByTagName("div")[0];
+        growDiv.style.height = (wrapper.clientHeight || wrapper.offsetHeight) + "px";
+      }
     }
   }
   </script>
 </head>
 <body>
-  <pre><%= content %></pre>
+  <div><%= content %></div>
   <% if files.count > 1 %>
   <div id="toc_container"><div id="toc">
     <div class="toc_control"><button id="toc_hide">Hide navigation &raquo;</button></div>
