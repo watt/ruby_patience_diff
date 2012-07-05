@@ -45,8 +45,8 @@ module PatienceDiff
       def render_header(*args)
         left_header, right_header = *super(*args)
         [
-          "<div class='left_header'>#{escape(left_header)}</div>",
-          "<div class='right_header'>#{escape(right_header)}</div>"
+          "<div class='left_title diff'>#{escape(left_header)}</div>",
+          "<div class='right_title diff'>#{escape(right_header)}</div>"
         ]
       end
         
@@ -74,20 +74,20 @@ module PatienceDiff
       def render_line(line, code)
         case code
         when :equal
-          "<div class='equal'> #{escape(line)}</div>"
+          "<div class='equal diff'> #{escape(line)}</div>"
         when :delete
-          "<div class='delete'>-#{escape(line)}</div>"
+          "<div class='delete diff'>-#{escape(line)}</div>"
         when :insert
-          "<div class='insert'>+#{escape(line)}</div>"
+          "<div class='insert diff'>+#{escape(line)}</div>"
         end
       end
       
       def escape(raw)
         CGI::escape_html(raw)
       end
-
-      def template
-        File.join(PatienceDiff::TEMPLATE_PATH, 'html.erb')
+      
+      def template(filename = "html.erb")
+        File.join(PatienceDiff::TEMPLATE_PATH, filename)
       end
       
       def render(formatter)

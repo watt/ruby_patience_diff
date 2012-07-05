@@ -2,28 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title><%= title %></title>
+  <title>Diff generated on Fri Jun 29 13:58:06 2012</title>
   <style>
   body {
     font-family: Consolas;
     font-size: 8pt;
   }
-  .delete, .insert, .equal, .left_header, .right_header, .group_header {
+  .diff {
     white-space: pre;
   }
-  .delete    { background-color: #FFCDCD; }
-  .insert    { background-color: #CDFFCD; }
-  .group_header { 
+  .delete    { background-color: #fdd; }
+  .insert    { background-color: #dfd; }
+  .header { 
     color: #000080; 
     font-family: Consolas;
-    /* font-weight: bold; 
+    font-weight: bold; 
     font-size: 11pt; 
-    margin: 0.5em 0; */
   }
   .divider {
     background-color: #CDE6FF;
+    background-image: -webkit-linear-gradient(top, #e8f4ff 0%, #cde6ff 100%);
     font-family: Calibri;
-    
+    border: solid hsl(210, 38%, 80%) 1px;
+    padding: 0px 2px 1px;
+    border-radius: 3px;
   }
   .hint {
     display: none;
@@ -31,16 +33,12 @@
   .divider:hover .hint {
     display: inline;
   }
-  .left_header {
-    background-color: #CDE6FF; 
-    color: #000080; 
-    font-weight: bold; 
+  .left_title {
     page-break-before: always;
   }
-  .right_header {
-    background-color: #CDE6FF; 
-    color: #000080; 
-    font-weight: bold; 
+  .left_title, .right_title {
+    background-color: #ddd; 
+    color: #222; 
   }
   .collapsed {
     -webkit-transition: height .5s;
