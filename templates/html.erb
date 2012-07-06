@@ -10,33 +10,50 @@
   }
   .diff {
     white-space: pre;
+    transition-property: background-color;
+    -webkit-transition-property: background-color;
+    transition-duration: .25s;
+    -webkit-transition-duration: .25s;
   }
-  .delete    { background-color: #fdd; }
-  .insert    { background-color: #dfd; }
+  .diff:hover {
+    background-color: #ff9;
+    transition-duration: 0s;
+    -webkit-transition-duration: 0s;
+  }
+  .delete     { background-color: #fdd; }
+  .insert     { background-color: #dfd; }
+  .divider {
+    position: relative;
+    background-color: hsl(210, 100%, 90%);
+    background-image: -webkit-linear-gradient(top, hsl(210, 100%, 95%) 0%, hsl(210, 100%, 90%) 100%);
+    font-family: Calibri;
+    border: solid hsl(210, 50%, 80%) 1px;
+    padding: 0px 2px 1px;
+    border-radius: 3px;
+    cursor: default;
+  }
+  .divider:hover {
+    background-image: -webkit-linear-gradient(top, hsl(210, 100%, 90%) 0%, hsl(210, 100%, 80%) 100%);
+    border: solid hsl(210, 100%, 60%) 1px;
+  }
   .marker { 
     color: #000080; 
     font-family: Consolas;
-    font-weight: bold; 
-    font-size: 11pt; 
-  }
-  .divider {
-    background-color: #CDE6FF;
-    background-image: -webkit-linear-gradient(top, #e8f4ff 0%, #cde6ff 100%);
-    font-family: Calibri;
-    border: solid hsl(210, 38%, 80%) 1px;
-    padding: 0px 2px 1px;
-    border-radius: 3px;
+    /*font-weight: bold; 
+    font-size: 11pt; */
+    position: absolute;
   }
   .hint {
-    display: none;
+    color: #999;
+    text-align: center;
   }
   .divider:hover .hint {
-    display: inline;
+    color: black;
   }
-  .left_title {
+  .left_header {
     page-break-before: always;
   }
-  .left_title, .right_title {
+  .left_header, .right_header {
     background-color: #ddd; 
     color: #222; 
   }
@@ -83,9 +100,9 @@
   </style>
   <script>
   function init() {
-    document.getElementById("toc_hide").onclick = page.hideNav;
-    document.getElementById("toc_show").onclick = page.showNav;
-    var jumps = document.getElementById("toc_list").getElementsByTagName("a")
+    $("toc_hide").onclick = page.hideNav;
+    $("toc_show").onclick = page.showNav;
+    var jumps = $("toc_list").getElementsByTagName("a")
     for (var i = 0, len = jumps.length; i < len; i++) {
       var id = "diff_"+i;
       jumps[i].onclick = function() {
@@ -94,40 +111,42 @@
       }
     }
   }
+  function $(id) {
+    return document.getElementById(id);
+  }
   function show(id) {
-    var el = document.getElementById(id);
-    if (el.tagName.toLowerCase() == "button") {
-      el.style.display = "inline-block";
-    } else {
-      el.style.display = "block";
-    }
+    $(id).style.display = "";
   }
   function hide(id) {
-    document.getElementById(id).style.display = "none";
+    $(id).style.display = "none";
   }
   page = {
     hideNav: function() {
       hide("toc_list");
       hide("toc_hide");
       show("toc_show");
-      document.getElementById("toc").className = "toc_seethru";
+      $("toc").className = "toc_seethru";
     },
     showNav: function() {
       hide("toc_show");
       show("toc_list");
       show("toc_hide");
-      document.getElementById("toc").className = "";
+      $("toc").className = "";
     },
     jump: function(id) {
-      scrollTo(0,document.getElementById(id).offsetTop);
+      scrollTo(0,$(id).offsetTop);
     },
     toggleCollapse: function(line) {
-      var growDiv = document.getElementById("collapsed_" + line);
+      var growDiv = $("hunk_" + line);
       if (growDiv.clientHeight || growDiv.offsetHeight) {
         growDiv.style.height = 0;
+        hide("collapse_" + line);
+        show("expand_" + line);
       } else {
         var wrapper = growDiv.getElementsByTagName("div")[0];
         growDiv.style.height = (wrapper.clientHeight || wrapper.offsetHeight) + "px";
+        hide("expand_" + line);
+        show("collapse_" + line);
       }
     }
   }

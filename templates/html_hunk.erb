@@ -1,9 +1,8 @@
 <% if hidden_line_count > 0 %>
-  <div class='collapsed' id='collapsed_<%= hunk_start %>'>
+  <div class='collapsed' id='hunk_<%= hunk_start %>'>
   	<div>
   		<div class='divider' onclick='page.toggleCollapse(<%= hunk_start %>)'>
-  			
-  			<span>&#x25B2; Click to collapse <%= hidden_line_count %> lines</span>
+  			<div class='hint'>&#x25B2; Click to collapse <%= hidden_line_count %> lines</div>
   		</div>
   		<% lines[(last_hunk_end+1)...hunk_start].each do |line| %>
   			<div class='equal diff'> <%= escape(line) %></div>
@@ -12,11 +11,13 @@
   </div>
   <div class='divider' onclick='page.toggleCollapse(<%= hunk_start %>)'>
   	<span class='marker diff'><%= escape(hunk_marker) %></span>
-  	<span class='hint'>&#x25BC; Click to expand <%= hidden_line_count %> lines</span>
+  	<div class='hint' id="expand_<%= hunk_start %>">&#x25BC; Click to expand <%= hidden_line_count %> lines</div>
+  	<div class='hint' id="collapse_<%= hunk_start %>" style="display: none">&#x25B2; Click to collapse <%= hidden_line_count %> lines</div>
   </div>
 <% else %>
   <div class='divider'>
   	<span class='marker diff'><%= escape(hunk_marker) %></span>
+  	&nbsp;
   </div>
 <% end %>
 
