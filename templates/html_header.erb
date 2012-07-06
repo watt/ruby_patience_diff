@@ -1,15 +1,2 @@
-<div class='collapsed' id='collapsed_<%= start %>'>
-	<div>
-		<div class='divider' onclick='page.toggleCollapse(<%= start %>)'>
-			<span class='header diff'><%= '&nbsp;' * header.length %></span>
-			<span>&#x25B2; Click to collapse <%= number_hidden %> lines</span>
-		</div>
-		<% src[(last_line_shown+1)...start].map do |line| %>
-			<%= render_line(line, :equal) %>
-		<% end %>
-	</div>
-</div>
-<div class='divider' onclick='page.toggleCollapse(<%= start %>)'>
-	<span class='header diff'><%= escape(header) %></span>
-	<span class='hint'>&#x25BC; Click to expand <%= number_hidden %> lines</span>
-</div>
+<div class='left_header diff'><%= escape(left_header) %></div>
+<div class='right_header diff'><%= escape(right_header) %></div>

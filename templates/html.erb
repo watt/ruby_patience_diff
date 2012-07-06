@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Diff generated on Fri Jun 29 13:58:06 2012</title>
+  <title><%= title %></title>
   <style>
   body {
     font-family: Consolas;
@@ -13,7 +13,7 @@
   }
   .delete    { background-color: #fdd; }
   .insert    { background-color: #dfd; }
-  .header { 
+  .marker { 
     color: #000080; 
     font-family: Consolas;
     font-weight: bold; 
@@ -134,14 +134,14 @@
   </script>
 </head>
 <body>
-  <div><%= content %></div>
-  <% if files.count > 1 %>
+  <div><%= format %></div>
+  <% if names.count > 1 %>
   <div id="toc_container"><div id="toc">
     <div class="toc_control"><button id="toc_hide">Hide navigation &raquo;</button></div>
     <div class="toc_control"><button id="toc_show" style="display: none">&laquo; Show navigation</button></div>
     <ol id="toc_list">
-    <% files.each_with_index do |file, i| %>
-      <li><a href="#diff_<%= i %>"><%= file %></a></li>
+    <% names.each_with_index do |name, i| %>
+      <li><a href="#diff_<%= i %>"><%= name %></a></li>
     <% end %>
     </ol>
   </div></div>

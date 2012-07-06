@@ -28,16 +28,16 @@ begin
   
   differ = case opts[:format]
     when 'text'
-      PatienceDiff::Differs::Unified
+      PatienceDiff::Differ
     when 'html'
-      PatienceDiff::Differs::Html
+      PatienceDiff::Html::Differ
     else
       raise PatienceDiff::UsageError
     end.new(opts)
   
-  differ.format do |formatter|
+  differ.format do |diff|
     ARGV.each_slice(2) do |(left_file, right_file)|
-      formatter.diff_files(left_file, right_file)
+      diff.files left_file, right_file
     end
   end.tap do |result|
     puts result
