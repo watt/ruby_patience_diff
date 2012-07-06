@@ -9,7 +9,7 @@ require 'patience_diff'
 begin
   opts = Trollop::options do
     banner <<-EOF.gsub(/^\s*/, '')
-      Usage: #{File.basename($0)} [options] left-file right-file (left-file-2 right-file-2 ...)
+      Usage: #{File.basename($PROGRAM_NAME)} [options] left-file right-file (left-file-2 right-file-2 ...)
       Options:
     EOF
     
@@ -37,13 +37,7 @@ begin
   
   differ.format do |formatter|
     ARGV.each_slice(2) do |(left_file, right_file)|
-      # Read in binary encoding, so that we can diff any encoding and split() won't complain
-      left = File.read(left_file, :external_encoding => Encoding::BINARY).split($RS)
-      left_timestamp = File.mtime(left_file)
-      right = File.read(right_file, :external_encoding => Encoding::BINARY).split($RS)
-      right_timestamp = File.mtime(right_file)
-      
-      formatter.diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
+      formatter.diff_files(left_file, right_file)
     end
   end.tap do |result|
     puts result
