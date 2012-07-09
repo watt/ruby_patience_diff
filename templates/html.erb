@@ -8,18 +8,8 @@
     font-family: Consolas;
     font-size: 8pt;
   }
-  .diff {
-    white-space: pre;
-    transition-property: background-color;
-    -webkit-transition-property: background-color;
-    transition-duration: .25s;
-    -webkit-transition-duration: .25s;
-  }
-  .diff:hover {
-    background-color: #ff9;
-    transition-duration: 0s;
-    -webkit-transition-duration: 0s;
-  }
+  .diff       { white-space: pre; }
+  .diff:hover { background-color: #ff9; }
   .delete     { background-color: #fdd; }
   .insert     { background-color: #dfd; }
   .divider {
@@ -39,8 +29,6 @@
   .marker { 
     color: #000080; 
     font-family: Consolas;
-    /*font-weight: bold; 
-    font-size: 11pt; */
     position: absolute;
   }
   .hint {
@@ -95,22 +83,16 @@
     font-family: Calibri;
     font-size: 10pt;
   }
-  .toc_seethru       { opacity: 0.33; }
-  .toc_seethru:hover { opacity: 1; }
+  .toc_seethru {
+    opacity: 0.33;
+    -webkit-transition: opacity 1s;
+  }
+  .toc_seethru:hover {
+    opacity: 1;
+    -webkit-transition-duration: 0;
+  }
   </style>
   <script>
-  function init() {
-    $("toc_hide").onclick = page.hideNav;
-    $("toc_show").onclick = page.showNav;
-    var jumps = $("toc_list").getElementsByTagName("a")
-    for (var i = 0, len = jumps.length; i < len; i++) {
-      var id = "diff_"+i;
-      jumps[i].onclick = function() {
-        page.jump(id);
-        return false;
-      }
-    }
-  }
   function $(id) {
     return document.getElementById(id);
   }
@@ -119,6 +101,42 @@
   }
   function hide(id) {
     $(id).style.display = "none";
+  }
+  function hasClass(el, classname) {
+    var classes = el.className.split(/\s+/);
+    for (var i = 0, len = classes.length; i < len; i++) {
+      if (classes[i] == classname)
+        return true;
+    }
+    return false;
+  }
+  function init() {
+    $("toc_hide").onclick = page.hideNav;
+    $("toc_show").onclick = page.showNav;
+    // set up TOC links
+    var jumps = $("toc_list").getElementsByTagName("a");
+    for (var i = 0, len = jumps.length; i < len; i++) {
+      var id = "diff_"+i;
+      jumps[i].onclick = function() {
+        page.jump(id);
+        return false;
+      }
+    }
+    // set up toggling of collapsed lines
+    var divs = $("content").getElementsByTagName("div");
+    for (var i = 0, len = divs.length; i < len; i++) {
+      var div = divs[i];
+      if (hasClass(div, "toggle")) {
+        var hunkStart = parseInt(div.id.replace(/^[^\d]*/,""));
+        if (hunkStart) {
+          div.onclick = function(hunkStart) {
+            return function() {
+              page.toggleCollapse(hunkStart);
+            }
+          }(hunkStart);
+        }
+      }
+    }
   }
   page = {
     hideNav: function() {
@@ -152,8 +170,8 @@
   }
   </script>
 </head>
-<body>
-  <div><%= format %></div>
+<body onload="init();">
+  <div id="content"><%= format %></div>
   <% if names.count > 1 %>
   <div id="toc_container"><div id="toc">
     <div class="toc_control"><button id="toc_hide">Hide navigation &raquo;</button></div>
