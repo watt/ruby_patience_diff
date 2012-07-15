@@ -1,187 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title><%= title %></title>
-  <style>
-  body {
-    font-family: Consolas;
-    font-size: 8pt;
-  }
-  .diff       { white-space: pre; }
-  .diff:hover { background-color: #ff9; }
-  .delete     { background-color: #fdd; }
-  .insert     { background-color: #dfd; }
-  .divider {
-    position: relative;
-    background-color: hsl(210, 100%, 90%);
-    background-image: -webkit-linear-gradient(top, hsl(210, 100%, 95%) 0%, hsl(210, 100%, 90%) 100%);
-    font-family: Calibri;
-    border: solid hsl(210, 50%, 80%) 1px;
-    padding: 0px 2px 1px;
-    border-radius: 3px;
-    cursor: default;
-  }
-  .divider:hover {
-    background-image: -webkit-linear-gradient(top, hsl(210, 100%, 90%) 0%, hsl(210, 100%, 80%) 100%);
-    border: solid hsl(210, 100%, 60%) 1px;
-  }
-  .marker { 
-    color: #000080; 
-    font-family: Consolas;
-    position: absolute;
-  }
-  .hint {
-    color: #999;
-    text-align: center;
-  }
-  .divider:hover .hint {
-    color: black;
-  }
-  .left_header {
-    page-break-before: always;
-  }
-  .left_header, .right_header {
-    background-color: #ddd; 
-    color: #222; 
-  }
-  .collapsed {
-    -webkit-transition: height .5s;
-    transition: height .5s;
-    height: 0;
-    overflow: hidden;
-  }
-  #toc_container {
-    position: fixed;
-    top: 0;
-    right: 0;
-    max-height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-  #toc {
-    border-left: solid black 1px;
-    border-bottom: solid black 1px;
-    border-bottom-left-radius: 5px;
-    
-    background: #f8fff8;
-    background-image: -moz-linear-gradient(left, #f8fff8 0%, #efe 100%);
-    background-image: -webkit-linear-gradient(left, #f8fff8 0%, #efe 100%);
-    background-image: linear-gradient(left, #f8fff8 0%, #efe 100%);
-    
-    font-family: Calibri;
-    font-size: 10pt;
-    padding: 1em 2em 1em 1em;
-  }
-  #toc ol      { margin: 0; padding: 0 0 0 30px; }
-  #toc a       { color: black; text-decoration: none; display: block; width: 100%; }
-  #toc a:hover { color: gray; }
-  .toc_control {
-    text-align: right;
-  }
-  .toc_control button {
-    font-family: Calibri;
-    font-size: 10pt;
-  }
-  .toc_seethru {
-    opacity: 0.33;
-    -webkit-transition: opacity 1s;
-  }
-  .toc_seethru:hover {
-    opacity: 1;
-    -webkit-transition-duration: 0;
-  }
-  </style>
-  <script>
-  function $(id) {
-    return document.getElementById(id);
-  }
-  function show(id) {
-    $(id).style.display = "";
-  }
-  function hide(id) {
-    $(id).style.display = "none";
-  }
-  function hasClass(el, classname) {
-    var classes = el.className.split(/\s+/);
-    for (var i = 0, len = classes.length; i < len; i++) {
-      if (classes[i] == classname)
-        return true;
-    }
-    return false;
-  }
-  function init() {
-    $("toc_hide").onclick = page.hideNav;
-    $("toc_show").onclick = page.showNav;
-    // set up TOC links
-    var jumps = $("toc_list").getElementsByTagName("a");
-    for (var i = 0, len = jumps.length; i < len; i++) {
-      var id = "diff_"+i;
-      jumps[i].onclick = function() {
-        page.jump(id);
-        return false;
-      }
-    }
-    // set up toggling of collapsed lines
-    var divs = $("content").getElementsByTagName("div");
-    for (var i = 0, len = divs.length; i < len; i++) {
-      var div = divs[i];
-      if (hasClass(div, "toggle")) {
-        var hunkStart = parseInt(div.id.replace(/^[^\d]*/,""));
-        if (hunkStart) {
-          div.onclick = function(hunkStart) {
-            return function() {
-              page.toggleCollapse(hunkStart);
-            }
-          }(hunkStart);
-        }
-      }
-    }
-  }
-  page = {
-    hideNav: function() {
-      hide("toc_list");
-      hide("toc_hide");
-      show("toc_show");
-      $("toc").className = "toc_seethru";
-    },
-    showNav: function() {
-      hide("toc_show");
-      show("toc_list");
-      show("toc_hide");
-      $("toc").className = "";
-    },
-    jump: function(id) {
-      scrollTo(0,$(id).offsetTop);
-    },
-    toggleCollapse: function(line) {
-      var growDiv = $("hunk_" + line);
-      if (growDiv.clientHeight || growDiv.offsetHeight) {
-        growDiv.style.height = 0;
-        hide("collapse_" + line);
-        show("expand_" + line);
-      } else {
-        var wrapper = growDiv.getElementsByTagName("div")[0];
-        growDiv.style.height = (wrapper.clientHeight || wrapper.offsetHeight) + "px";
-        hide("expand_" + line);
-        show("collapse_" + line);
-      }
-    }
-  }
-  </script>
+	<meta charset="utf-8" />
+	<title><%= title %></title>
+	<style>
+	body {
+		font-family: Consolas;
+		font-size: 8pt;
+	}
+	.diff, .marker { white-space: pre; }
+	.diff:hover    { background-color: #ff9; }
+	.delete        { background-color: #fdd; }
+	.insert        { background-color: #dfd; }
+	.divider {
+		position: relative;
+		background-color: #cce5ff; /* hsl(210, 100%, 90%) */
+		background-image: -webkit-linear-gradient(top, hsl(210, 100%, 95%) 0%, hsl(210, 100%, 90%) 100%);
+		background-image: -moz-linear-gradient(top, hsl(210, 100%, 95%) 0%, hsl(210, 100%, 90%) 100%);
+		background-image: -o-linear-gradient(top, hsl(210, 100%, 95%) 0%, hsl(210, 100%, 90%) 100%);
+		background-image: linear-gradient(top, hsl(210, 100%, 95%) 0%, hsl(210, 100%, 90%) 100%);
+		font-family: Calibri;
+		border: solid 1px #b3cce6; /* hsl(210, 50%, 80%) */
+		padding: 0 2px;
+		border-radius: 3px;
+		cursor: default;
+	}
+	.toggle:hover {
+		background-image: -webkit-linear-gradient(top, hsl(210, 100%, 90%) 0%, hsl(210, 100%, 80%) 100%);
+		background-image: -moz-linear-gradient(top, hsl(210, 100%, 90%) 0%, hsl(210, 100%, 80%) 100%);
+		background-image: -o-linear-gradient(top, hsl(210, 100%, 90%) 0%, hsl(210, 100%, 80%) 100%);
+		background-image: linear-gradient(top, hsl(210, 100%, 90%) 0%, hsl(210, 100%, 80%) 100%);
+		border: solid 1px #39f; /* hsl(210, 100%, 60%) */
+	}
+	.marker { 
+		color: #000080; 
+		font-family: Consolas;
+		position: absolute;
+	}
+	.hint {
+		color: #999;
+		text-align: center;
+	}
+	.divider:hover .hint {
+		color: black;
+	}
+	.down_arrow, .up_arrow                { position: relative; }
+	.down_arrow:after, .down_arrow:before { top: 100%; }
+	.up_arrow:after, .up_arrow:before     { bottom: 100%; }
+	.down_arrow:after, .down_arrow:before, .up_arrow:after, .up_arrow:before {
+		border: solid transparent;
+		content: " ";
+		height: 0;
+		width: 0;
+		position: absolute;
+		left: 50%;
+		/* pointer-events: none; */
+	}
+	.down_arrow:after, .up_arrow:after {
+		border-width: 5px;
+		margin-left: -5px;
+	}
+	.down_arrow:before, .up_arrow:before {
+		border-width: 6px;
+		margin-left: -6px;
+	}
+	.down_arrow:after                { border-top-color:    hsl(210, 100%, 90%); }
+	.up_arrow:after                  { border-bottom-color: hsl(210, 100%, 95%); }
+	.down_arrow:before               { border-top-color:    hsl(210,  50%, 80%); }
+	.up_arrow:before                 { border-bottom-color: hsl(210,  50%, 80%); }
+	.toggle:hover .down_arrow:after  { border-top-color:    hsl(210, 100%, 80%); }
+	.toggle:hover .down_arrow:before { border-top-color:    hsl(210, 100%, 60%); }
+	.toggle:hover .up_arrow:after    { border-bottom-color: hsl(210, 100%, 90%); }
+	.toggle:hover .up_arrow:before   { border-bottom-color: hsl(210, 100%, 60%); }
+	.left_header {
+		page-break-before: always;
+	}
+	.left_header, .right_header {
+		background-color: #ddd; 
+		color: #222; 
+	}
+	.collapsed {
+		-webkit-transition: height .5s;
+		-moz-transition: height .5s;
+		-o-transition: height .5s;
+		transition: height .5s;
+		height: 0;
+		overflow: hidden;
+	}
+	#toc_container {
+		position: fixed;
+		top: 0;
+		right: 0;
+		max-height: 100%;
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+	#toc {
+		border-left: solid black 1px;
+		border-bottom: solid black 1px;
+		border-bottom-left-radius: 5px;
+		
+		background: #f8fff8;
+		background-image: -webkit-linear-gradient(left, #f8fff8 0%, #efe 100%);
+		background-image: -moz-linear-gradient(left, #f8fff8 0%, #efe 100%);
+		background-image: -o-linear-gradient(left, #f8fff8 0%, #efe 100%);
+		background-image: linear-gradient(left, #f8fff8 0%, #efe 100%);
+		
+		font-family: Calibri;
+		font-size: 10pt;
+		padding: 1em 2em 1em 1em;
+	}
+	#toc ol      { margin: 0; padding: 0 0 0 30px; }
+	#toc a       { color: black; text-decoration: none; display: block; width: 100%; }
+	#toc a:hover { color: gray; }
+	.toc_control {
+		text-align: right;
+	}
+	.toc_control button {
+		font-family: Calibri;
+		font-size: 10pt;
+	}
+	.toc_seethru {
+		opacity: 0.33;
+		-webkit-transition: opacity 1s;
+		-moz-transition: opacity 1s;
+		-o-transition: opacity 1s;
+		transition: opacity 1s;
+	}
+	.toc_seethru:hover {
+		opacity: 1;
+		-webkit-transition-duration: 0;
+		-moz-transition-duration: 0;
+		-o-transition-duration: 0;
+		transition-duration: 0;
+	}
+	</style>
+	<script>
+	function $(id) {
+		return document.getElementById(id);
+	}
+	function show(id) {
+		$(id).style.display = "";
+	}
+	function hide(id) {
+		$(id).style.display = "none";
+	}
+	function hasClass(el, classname) {
+		var classes = el.className.split(/\s+/);
+		for (var i = 0, len = classes.length; i < len; i++) {
+			if (classes[i] == classname)
+				return true;
+		}
+		return false;
+	}
+	function init() {
+		<% if names.count > 1 %>
+		$("toc_hide").onclick = page.hideNav;
+		$("toc_show").onclick = page.showNav;
+		// set up TOC links
+		var jumps = $("toc_list").getElementsByTagName("a");
+		for (var i = 0, len = jumps.length; i < len; i++) {
+			var id = "diff_"+i;
+			jumps[i].onclick = function() {
+				page.jump(id);
+				return false;
+			}
+		}
+		<% end %>
+		// set up toggling of collapsed lines
+		var divs = $("content").getElementsByTagName("div");
+		for (var i = 0, len = divs.length; i < len; i++) {
+			var div = divs[i];
+			if (hasClass(div, "toggle")) {
+				var hunkStart = parseInt(div.id.replace(/^[^\d]*/,""));
+				if (hunkStart) {
+					div.onclick = function(hunkStart) {
+						return function() {
+							page.toggleCollapse(hunkStart);
+						}
+					}(hunkStart);
+				}
+			}
+		}
+	}
+	page = {
+		hideNav: function() {
+			hide("toc_list");
+			hide("toc_hide");
+			show("toc_show");
+			$("toc").className = "toc_seethru";
+		},
+		showNav: function() {
+			hide("toc_show");
+			show("toc_list");
+			show("toc_hide");
+			$("toc").className = "";
+		},
+		jump: function(id) {
+			scrollTo(0,$(id).offsetTop);
+		},
+		toggleCollapse: function(line) {
+			var growDiv = $("hunk_" + line);
+			if (growDiv.clientHeight || growDiv.offsetHeight) {
+				growDiv.style.height = 0;
+				hide("collapse_" + line);
+				show("expand_" + line);
+			} else {
+				var wrapper = growDiv.getElementsByTagName("div")[0];
+				growDiv.style.height = (wrapper.clientHeight || wrapper.offsetHeight) + "px";
+				hide("expand_" + line);
+				show("collapse_" + line);
+			}
+		}
+	}
+	</script>
 </head>
 <body onload="init();">
-  <div id="content"><%= format %></div>
-  <% if names.count > 1 %>
-  <div id="toc_container"><div id="toc">
-    <div class="toc_control"><button id="toc_hide">Hide navigation &raquo;</button></div>
-    <div class="toc_control"><button id="toc_show" style="display: none">&laquo; Show navigation</button></div>
-    <ol id="toc_list">
-    <% names.each_with_index do |name, i| %>
-      <li><a href="#diff_<%= i %>"><%= name %></a></li>
-    <% end %>
-    </ol>
-  </div></div>
-  <% end %>
+	<div id="content"><%= format %></div>
+	<% if names.count > 1 %>
+	<div id="toc_container"><div id="toc">
+		<div class="toc_control"><button id="toc_hide">Hide navigation &raquo;</button></div>
+		<div class="toc_control"><button id="toc_show" style="display: none">&laquo; Show navigation</button></div>
+		<ol id="toc_list">
+		<% names.each_with_index do |name, i| %>
+			<li><a href="#diff_<%= i %>"><%= name %></a></li>
+		<% end %>
+		</ol>
+	</div></div>
+	<% end %>
 </body>
 </html>
