@@ -1,4 +1,4 @@
-require 'patience_diff/differ'
+require 'patience_diff/formatter'
 require 'patience_diff/formatting_context'
 require 'patience_diff/html/header_helper'
 require 'patience_diff/html/hunk_helper'
@@ -9,7 +9,7 @@ module PatienceDiff
   module Html
     
     # Produces a fancy HTML-formatted unified diff. All your friends will be jealous.
-    class Differ < PatienceDiff::Differ
+    class Formatter < PatienceDiff::Formatter
       def initialize(*args)
         super(*args)
         @erbs = Hash.new do |hash, key|
@@ -17,15 +17,15 @@ module PatienceDiff
         end
       end
       
-      def format(opts = {})
-        context = FormattingContext.new(self, opts[:title])
+      def format
+        context = FormattingContext.new(@differ, self)
         yield context
         template.evaluate(context)
       end
             
-      private
       def render_header(*args)
-        helper = HeaderHelper.new(*super(*args))
+        left_header, right_header = *super(*args)
+        helper = HeaderHelper.new(left_header, right_header, @names.count)
         template("html_header.erb").evaluate(helper)
       end
       
@@ -34,6 +34,7 @@ module PatienceDiff
         template("html_hunk.erb").evaluate(helper)
       end
       
+      private
       def template(filename = "html.erb")
         @erbs[File.join(PatienceDiff::TEMPLATE_PATH, filename)]
       end

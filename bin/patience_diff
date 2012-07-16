@@ -26,16 +26,17 @@ begin
   
   raise PatienceDiff::UsageError unless ARGV.length and ARGV.length % 2 == 0
   
-  differ = case opts[:format]
+  differ = PatienceDiff::Differ.new(opts)
+  formatter = case opts.delete(:format)
     when 'text'
-      PatienceDiff::Differ
+      PatienceDiff::Formatter
     when 'html'
-      PatienceDiff::Html::Differ
+      PatienceDiff::Html::Formatter
     else
       raise PatienceDiff::UsageError
-    end.new(opts)
+    end.new(differ)
   
-  differ.format do |diff|
+  formatter.format do |diff|
     ARGV.each_slice(2) do |(left_file, right_file)|
       diff.files left_file, right_file
     end

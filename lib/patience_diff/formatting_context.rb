@@ -3,27 +3,30 @@ require 'stringio'
 module PatienceDiff
   # Delegate object yielded by the #format method.
   class FormattingContext
-    attr_reader :names, :title
-    
-    def initialize(differ, title = nil)
+    def initialize(differ, formatter)
       @differ = differ
-      @names = []
+      @formatter = formatter
       @out = StringIO.new
-      @title = title || "Diff generated on #{Time.now.strftime('%c')}"
     end
     
     def files(left_file, right_file)
-      @names << left_file
-      @out.puts @differ.diff_files(left_file, right_file)
+      @out.puts @differ.diff_files(left_file, right_file, @formatter)
     end
     
     def sequences(left, right, left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
-      @names << left_name
-      @out.puts @differ.diff(left, right, left_name, right_name, left_timestamp, right_timestamp)
+      @out.puts @differ.diff(left, right, left_name, right_name, left_timestamp, right_timestamp, @formatter)
     end
     
     def format
       @out.string
+    end
+    
+    def title
+      @formatter.title
+    end
+    
+    def names
+      @formatter.names
     end
   end
 end
