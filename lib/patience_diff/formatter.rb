@@ -40,7 +40,7 @@ module PatienceDiff
     end
     
     def render_hunk(a, b, opcodes, last_line_shown)
-      lines = render_hunk_marker(opcodes)
+      lines = [render_hunk_marker(opcodes)]
       lines << opcodes.collect do |(code, a_start, a_end, b_start, b_end)|
         case code
         when :equal 
