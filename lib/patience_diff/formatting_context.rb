@@ -17,6 +17,10 @@ module PatienceDiff
       @out.puts @differ.diff(left, right, left_name, right_name, left_timestamp, right_timestamp, @formatter)
     end
     
+    def orphan(sequence, name=nil, timestamp=nil)
+      @out.puts @formatter.render_orphan(sequence, name, timestamp)
+    end
+    
     def format
       @out.string
     end

@@ -25,8 +25,8 @@ module PatienceDiff
       @left_timestamp = left_timestamp || Time.now
       @right_timestamp = right_timestamp || Time.now
       [
-        "--- %s\t%s" % [@left_name, @left_timestamp.strftime("%Y-%m-%d %H:%m:%S.%N %z")],
-        "+++ %s\t%s" % [@right_name, @right_timestamp.strftime("%Y-%m-%d %H:%m:%S.%N %z")]
+        left_header_line(@left_name, @left_timestamp),
+        right_header_line(@right_name, @right_timestamp)
       ]
     end
     
@@ -52,6 +52,15 @@ module PatienceDiff
         end
       end
       lines
+    end
+    
+    private
+    def left_header_line(name, timestamp)
+      "--- %s\t%s" % [name, timestamp.strftime("%Y-%m-%d %H:%m:%S.%N %z")]
+    end
+    
+    def right_header_line(name, timestamp)
+      "+++ %s\t%s" % [name, timestamp.strftime("%Y-%m-%d %H:%m:%S.%N %z")]
     end
   end
 end

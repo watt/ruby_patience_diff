@@ -18,7 +18,7 @@
 			Click to collapse <%= hidden_line_count %> lines
 		</div>
 	</div>
-<% else %>
+<% elsif !hunk_marker.empty? %>
 	<div class="divider">
 		<span class="marker"><%= escape(hunk_marker) %></span>
 		&nbsp;
