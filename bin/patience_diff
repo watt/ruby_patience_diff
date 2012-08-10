@@ -41,7 +41,7 @@ begin
       diff.files left_file, right_file
     end
   end.tap do |result|
-    puts result
+    print result
   end
   
 rescue PatienceDiff::UsageError => e

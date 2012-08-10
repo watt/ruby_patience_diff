@@ -49,6 +49,8 @@ module PatienceDiff
         hunks = @matcher.grouped_opcodes(a, b)
       end
       
+      return nil unless hunks.any?
+      
       lines = []
       lines << formatter.render_header(left_name, right_name, left_timestamp, right_timestamp)
       last_hunk_end = -1
@@ -56,7 +58,7 @@ module PatienceDiff
         lines << formatter.render_hunk(a, b, opcodes, last_hunk_end)
         last_hunk_end = opcodes.last[4]
       end
-      lines.flatten.compact.join(@line_ending)
+      lines.flatten.compact.join(@line_ending) + @line_ending
     end
   end
 end
