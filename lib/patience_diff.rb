@@ -6,6 +6,6 @@ require 'patience_diff/usage_error'
 PatienceDiff.autoload(:Html, 'patience_diff/html/formatter')
 
 module PatienceDiff
-  VERSION = "1.0.1"
+  VERSION = "1.1.0"
   TEMPLATE_PATH = File.expand_path(File.join(File.dirname(__FILE__),'..','templates'))
 end
