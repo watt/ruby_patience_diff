@@ -149,7 +149,7 @@ module PatienceDiff
           b_mid -= 1
         end
         recursively_match(a, b, a_lo, b_lo, a_mid, b_mid) { |match| yield match }
-        0...(a_hi-a_mid).each do |i|
+        (0...(a_hi-a_mid)).each do |i|
           yield [a_mid+i, b_mid+i]
         end
       end

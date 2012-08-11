@@ -160,11 +160,12 @@
 		// set up TOC links
 		var jumps = $("toc_list").getElementsByTagName("a");
 		for (var i = 0, len = jumps.length; i < len; i++) {
-			var id = "diff_"+i;
-			jumps[i].onclick = function() {
-				page.jump(id);
-				return false;
-			}
+			jumps[i].onclick = function(id) {
+				return function() {
+					page.jump(id);
+					return false;
+				}
+			}("header_" + i);
 		}
 		<% end %>
 		// set up toggling of collapsed lines
@@ -177,6 +178,7 @@
 					div.onclick = function(hunkStart) {
 						return function() {
 							page.toggleCollapse(hunkStart);
+							return false;
 						}
 					}(hunkStart);
 				}
@@ -223,7 +225,7 @@
 		<div class="toc_control"><button id="toc_show" style="display: none">&laquo; Show navigation</button></div>
 		<ol id="toc_list">
 		<% names.each_with_index do |name, i| %>
-			<li><a href="#diff_<%= i %>"><%= name %></a></li>
+			<li><a href="#header_<%= i %>"><%= name %></a></li>
 		<% end %>
 		</ol>
 	</div></div>
