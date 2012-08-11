@@ -40,14 +40,15 @@ module PatienceDiff
         left_header = "--- New file"
         right_header = right_header_line(name, timestamp)
         helper = HeaderHelper.new(left_header, right_header, @names.count)
-        template("html_header.erb").evaluate(helper)
+        result = template("html_header.erb").evaluate(helper)
         
         # create one opcode with the entire content
         opcodes = [
           [:equal, 0, sequence.length-1, 0, sequence.length-1]
         ]
         helper = HunkHelper.new(sequence, sequence, nil, opcodes, 0)
-        template("html_hunk.erb").evaluate(helper)
+        result << template("html_hunk.erb").evaluate(helper)
+        result
       end
       
       private
