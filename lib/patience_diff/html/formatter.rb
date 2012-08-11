@@ -25,7 +25,7 @@ module PatienceDiff
             
       def render_header(*args)
         left_header, right_header = *super(*args)
-        helper = HeaderHelper.new(left_header, right_header, @names.count)
+        helper = HeaderHelper.new(left_header, right_header, @names.count - 1)
         template("html_header.erb").evaluate(helper)
       end
       
