@@ -10,8 +10,6 @@ module PatienceDiff
     
     # Produces a fancy HTML-formatted unified diff. All your friends will be jealous.
     class Formatter < PatienceDiff::Formatter
-      attr_accessor :syntax_highlighter
-      
       def initialize(*args)
         super(*args)
         @erbs = Hash.new do |hash, key|
@@ -32,7 +30,7 @@ module PatienceDiff
       end
       
       def render_hunk(a, b, opcodes, last_hunk_end)
-        helper = HunkHelper.new(a, b, render_hunk_marker(opcodes), opcodes, last_hunk_end, @syntax_highlighter)
+        helper = hunk_context(a, b, render_hunk_marker(opcodes), opcodes, last_hunk_end)
         template("html_hunk.erb").evaluate(helper)
       end
       
@@ -48,14 +46,23 @@ module PatienceDiff
         opcodes = [
           [:equal, 0, sequence.length-1, 0, sequence.length-1]
         ]
-        helper = HunkHelper.new(sequence, sequence, nil, opcodes, 0, @syntax_highlighter)
+        helper = hunk_context(sequence, sequence, nil, opcodes, 0)
         result << template("html_hunk.erb").evaluate(helper)
         result
       end
       
       private
       def template(filename = "html.erb")
-        @erbs[File.join(PatienceDiff::TEMPLATE_PATH, filename)]
+        @erbs[template_path(filename)]
+      end
+      
+      # override to add/change templates
+      def template_path(filename)
+        File.join(PatienceDiff::TEMPLATE_PATH, filename)
+      end
+      
+      def hunk_context(a, b, hunk_marker, opcodes, last_hunk_end)
+        HunkHelper.new(a, b, render_hunk_marker(opcodes), opcodes, last_hunk_end)
       end
     end
   end
