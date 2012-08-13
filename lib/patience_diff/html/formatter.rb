@@ -39,7 +39,7 @@ module PatienceDiff
         @names << name
         left_header = "--- New file"
         right_header = right_header_line(name, timestamp)
-        helper = HeaderHelper.new(left_header, right_header, @names.count)
+        helper = HeaderHelper.new(left_header, right_header, @names.count - 1)
         result = template("html_header.erb").evaluate(helper)
         
         # create one opcode with the entire content

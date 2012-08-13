@@ -19,7 +19,7 @@ module PatienceDiff
     end
     
     def render_header(left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
-      @names << left_name
+      @names << right_name
       @left_name = left_name || "Original"
       @right_name = right_name || "Current"
       @left_timestamp = left_timestamp || Time.now
