@@ -4,14 +4,15 @@ module PatienceDiff
   module Html
     class HunkHelper
       include Escaping
-      attr_accessor :a, :b, :hunk_marker, :opcodes, :last_hunk_end
+      attr_accessor :a, :b, :hunk_marker, :opcodes, :last_hunk_end, :hunk_id
       
-      def initialize(a, b, hunk_marker, opcodes, last_hunk_end)
+      def initialize(a, b, hunk_marker, opcodes, last_hunk_end, hunk_id)
         @a = a
         @b = b
         @hunk_marker = hunk_marker
         @opcodes = opcodes
         @last_hunk_end = last_hunk_end
+        @hunk_id = hunk_id
       end
       
       def hunk_start

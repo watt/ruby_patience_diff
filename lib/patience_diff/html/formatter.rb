@@ -15,6 +15,7 @@ module PatienceDiff
         @erbs = Hash.new do |hash, key|
           hash[key] = Erubis::Eruby.new(File.read(key))
         end
+        @hunk_count = 0
       end
       
       def format
@@ -62,7 +63,8 @@ module PatienceDiff
       end
       
       def hunk_context(a, b, hunk_marker, opcodes, last_hunk_end)
-        HunkHelper.new(a, b, render_hunk_marker(opcodes), opcodes, last_hunk_end)
+        @hunk_count += 1
+        HunkHelper.new(a, b, render_hunk_marker(opcodes), opcodes, last_hunk_end, @hunk_count)
       end
     end
   end
