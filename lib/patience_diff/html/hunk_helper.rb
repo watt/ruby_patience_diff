@@ -31,18 +31,18 @@ module PatienceDiff
         opcodes.each do |(code, a_start, a_end, b_start, b_end)|
           case code
           when :delete
-            a[a_start..a_end].each { |line| yield 'delete', '-' + line }
+            a[a_start..a_end].each { |line| yield 'delete', '-' + format_line(line) }
           when :equal
-            b[b_start..b_end].each { |line| yield 'equal',  ' ' + line }
+            b[b_start..b_end].each { |line| yield 'equal',  ' ' + format_line(line) }
           when :insert
-            b[b_start..b_end].each { |line| yield 'insert', '+' + line }
+            b[b_start..b_end].each { |line| yield 'insert', '+' + format_line(line) }
           end
         end
       end
       
       def format_line(line)
         if @syntax_highlighter
-          @syntax_highlighter.highlight(escape(line))
+          @syntax_highlighter.highlight_line(escape(line))
         else
           escape(line)
         end

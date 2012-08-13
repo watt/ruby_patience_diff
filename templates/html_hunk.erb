@@ -25,6 +25,6 @@
 	</div>
 <% end %>
 
-<% each_line do |code, line| %>
-	<div class="<%= code %> diff"><%= format_line(line) %></div>
+<% each_line do |code, formatted_line| %>
+	<div class="<%= code %> diff"><%= formatted_line %></div>
 <% end %>
