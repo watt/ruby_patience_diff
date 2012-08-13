@@ -3,7 +3,6 @@ require 'patience_diff/formatter'
 require 'patience_diff/sequence_matcher'
 
 module PatienceDiff
-  # Produces plaintext unified diffs.
   class Differ
     attr_reader :matcher
     attr_accessor :all_context, :line_ending, :ignore_whitespace

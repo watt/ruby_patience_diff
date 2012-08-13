@@ -5,7 +5,7 @@
 				<div class="hint down_arrow">Click to collapse <%= hidden_line_count %> lines</div>
 			</div>
 			<% lines[(last_hunk_end+1)...hunk_start].each do |line| %>
-				<div class="equal diff"> <%= escape(line) %></div>
+				<div class="equal diff"> <%= format_line(line) %></div>
 			<% end %>
 		</div>
 	</div>
@@ -26,5 +26,5 @@
 <% end %>
 
 <% each_line do |code, line| %>
-	<div class="<%= code %> diff"><%= escape(line) %></div>
+	<div class="<%= code %> diff"><%= format_line(line) %></div>
 <% end %>

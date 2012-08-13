@@ -1,10 +1,10 @@
 require 'patience_diff/formatting_context'
 
 module PatienceDiff
-  # Delegate object yielded by the #format method.
+  # Formats a plaintext unified diff.
   class Formatter
-    attr_reader :names, :title
-    attr_accessor :left_name, :right_name, :left_timestamp, :right_timestamp
+    attr_reader :names
+    attr_accessor :left_name, :right_name, :left_timestamp, :right_timestamp, :title
     
     def initialize(differ, title = nil)
       @differ = differ

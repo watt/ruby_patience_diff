@@ -4,14 +4,15 @@ module PatienceDiff
   module Html
     class HunkHelper
       include Escaping
-      attr_accessor :a, :b, :hunk_marker, :opcodes, :last_hunk_end
+      attr_accessor :a, :b, :hunk_marker, :opcodes, :last_hunk_end, :syntax_highlighter
       
-      def initialize(a, b, hunk_marker, opcodes, last_hunk_end)
+      def initialize(a, b, hunk_marker, opcodes, last_hunk_end, syntax_highlighter)
         @a = a
         @b = b
         @hunk_marker = hunk_marker
         @opcodes = opcodes
         @last_hunk_end = last_hunk_end
+        @syntax_highlighter = syntax_highlighter
       end
       
       def hunk_start
@@ -36,6 +37,14 @@ module PatienceDiff
           when :insert
             b[b_start..b_end].each { |line| yield 'insert', '+' + line }
           end
+        end
+      end
+      
+      def format_line(line)
+        if @syntax_highlighter
+          @syntax_highlighter.highlight(escape(line))
+        else
+          escape(line)
         end
       end
     end

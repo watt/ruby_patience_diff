@@ -10,6 +10,8 @@ module PatienceDiff
     
     # Produces a fancy HTML-formatted unified diff. All your friends will be jealous.
     class Formatter < PatienceDiff::Formatter
+      attr_accessor :syntax_highlighter
+      
       def initialize(*args)
         super(*args)
         @erbs = Hash.new do |hash, key|
@@ -30,7 +32,7 @@ module PatienceDiff
       end
       
       def render_hunk(a, b, opcodes, last_hunk_end)
-        helper = HunkHelper.new(a, b, render_hunk_marker(opcodes), opcodes, last_hunk_end)
+        helper = HunkHelper.new(a, b, render_hunk_marker(opcodes), opcodes, last_hunk_end, @syntax_highlighter)
         template("html_hunk.erb").evaluate(helper)
       end
       
