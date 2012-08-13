@@ -65,14 +65,14 @@
 	.toggle:hover .up_arrow:before       { border-bottom-color: hsl(210, 100%, 60%); }
 	.left_header                { page-break-before: always; }
 	.left_header, .right_header { background-color: #ddd; color: #222; }
-	.collapsed { overflow: hidden; }
 	#content .collapsed {
 		-webkit-transition: bottom .5s, height .5s;
 		-moz-transition:    bottom .5s, height .5s;
 		-o-transition:      bottom .5s, height .5s;
 		transition:         bottom .5s, height .5s;
 		height: 0;
-	}
+    overflow: hidden
+  }
 	#nav_container {
 		position: fixed;
 		top: 0;
@@ -94,6 +94,9 @@
 		overflow: hidden;
 		background: #eee;
 		background-image: -webkit-linear-gradient(left, #e7e7e7 0%, #eee 25%, #eee 75%, #e7e7e7 100%);
+		background-image: -moz-linear-gradient(left, #e7e7e7 0%, #eee 25%, #eee 75%, #e7e7e7 100%);
+		background-image: -o-linear-gradient(left, #e7e7e7 0%, #eee 25%, #eee 75%, #e7e7e7 100%);
+		background-image: linear-gradient(left, #e7e7e7 0%, #eee 25%, #eee 75%, #e7e7e7 100%);
 		font-family: Calibri, "Lucida Grande", sans-serif;
 		font-size: 10pt;
 	}
@@ -111,6 +114,9 @@
 		width: 100%;
 		background: #ddd;
 		background-image: -webkit-linear-gradient(top, #eee 0%, #ccc 100%);
+		background-image: -moz-linear-gradient(top, #eee 0%, #ccc 100%);
+		background-image: -o-linear-gradient(top, #eee 0%, #ccc 100%);
+		background-image: linear-gradient(top, #eee 0%, #ccc 100%);
 		border: none;
 		border-top: solid white 1px;
 		border-bottom: solid #999 1px;
@@ -121,21 +127,27 @@
 	#nav button:hover {
 		background: #eee;
 		background-image: -webkit-linear-gradient(top, #fff 0%, #ddd 100%);
+		background-image: -moz-linear-gradient(top, #fff 0%, #ddd 100%);
+		background-image: -o-linear-gradient(top, #fff 0%, #ddd 100%);
+		background-image: linear-gradient(top, #fff 0%, #ddd 100%);
 	}
 	#nav button:active {
 		border-top: solid black 1px;
 		background: #333;
 		background-image: -webkit-linear-gradient(top, #333 0%, #666 100%);
+		background-image: -moz-linear-gradient(top, #333 0%, #666 100%);
+		background-image: -o-linear-gradient(top, #333 0%, #666 100%);
+		background-image: linear-gradient(top, #333 0%, #666 100%);
 		color: white;
 		text-shadow: 0 1px 0 black;
 	}
 	#nav_container.collapsed { opacity: 0.33; }
 	#nav_container.collapsed:hover {
 		opacity: 1;
-		-webkit-transition: opacity 0, bottom .5s, height .5s;
-		-moz-transition:    opacity 0, bottom .5s, height .5s;
-		-o-transition:      opacity 0, bottom .5s, height .5s;
-		transition:         opacity 0, bottom .5s, height .5s;
+		-webkit-transition: opacity 0s, bottom .5s, height .5s;
+		-moz-transition:    opacity 0s, bottom .5s, height .5s;
+		-o-transition:      opacity 0s, bottom .5s, height .5s;
+		transition:         opacity 0s, bottom .5s, height .5s;
 	}
 	#nav ol      { margin: 0.5em; padding: 0 15px 0 30px; }
 	#nav a       { color: black; text-decoration: none; display: block; width: 100%; }
@@ -171,7 +183,9 @@
 		var container = $("nav_container");
 		container.style.width = navWidth + "px";
 		if (container.addEventListener) {
-			container.addEventListener("webkitTransitionEnd", page.toggleContainer);
+			container.addEventListener("webkitTransitionEnd", page.navTransitioned);
+			container.addEventListener("transitionend", page.navTransitioned);
+			container.addEventListener("oTransitionEnd", page.navTransitioned);
 		}
 		$("nav_hide").onclick = page.hideNav;
 		$("nav_show").onclick = page.showNav;
@@ -219,10 +233,11 @@
 			// set a fixed height, and clear the bottom
 			container.style.height = windowHeight() + "px";
 			container.style.bottom = "auto";
+			// this is a hack to make sure the height is recalculated so that the transition animation triggers
 			setTimeout(function() {
 				container.className = "";
 				container.style.height = buttonHeight;
-			}, 0);
+			}, 10);
 		},
 		showNav: function() {
 			hide("nav_show");
@@ -235,7 +250,7 @@
 			setTimeout(function() {
 				container.className = "";
 				container.style.bottom = "0";
-			}, 0);
+			}, 10);
 		},
 		navTransitioned: function() {
 			var container = $("nav_container");
