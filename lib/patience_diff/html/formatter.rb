@@ -48,7 +48,7 @@ module PatienceDiff
         opcodes = [
           [:equal, 0, sequence.length-1, 0, sequence.length-1]
         ]
-        helper = HunkHelper.new(sequence, sequence, nil, opcodes, 0)
+        helper = HunkHelper.new(sequence, sequence, nil, opcodes, 0, @syntax_highlighter)
         result << template("html_hunk.erb").evaluate(helper)
         result
       end
