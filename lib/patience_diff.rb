@@ -1,3 +1,4 @@
+require 'pathname'
 require 'patience_diff/differ'
 require 'patience_diff/formatter'
 require 'patience_diff/formatting_context'
