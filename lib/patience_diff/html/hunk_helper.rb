@@ -6,7 +6,7 @@ module PatienceDiff
       include Escaping
       attr_accessor :a, :b, :hunk_marker, :opcodes, :last_hunk_end, :syntax_highlighter
       
-      def initialize(a, b, hunk_marker, opcodes, last_hunk_end, syntax_highlighter)
+      def initialize(a, b, hunk_marker, opcodes, last_hunk_end, syntax_highlighter = nil)
         @a = a
         @b = b
         @hunk_marker = hunk_marker
