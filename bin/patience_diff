@@ -1,19 +1,21 @@
 #!/usr/bin/env ruby
 require 'English'
+require 'pathname'
 require 'trollop'
 
-lib_path = File.expand_path(File.join(File.dirname(__FILE__),"..","lib"))
+lib_path = Pathname(File.join(File.dirname(__FILE__),"..","lib")).realpath
 $LOAD_PATH.unshift(lib_path)
 require 'patience_diff'
 
 begin
+  program_name = File.basename($PROGRAM_NAME)
   opts = Trollop::options do
     banner <<-EOF.gsub(/^\s*/, '')
-      Usage: #{File.basename($PROGRAM_NAME)} [options] left-file right-file (left-file-2 right-file-2 ...)
+      Usage: #{program_name} [options] left-file right-file (left-file-2 right-file-2 ...)
       Options:
     EOF
     
-    version "patience_diff #{PatienceDiff::VERSION}"
+    version "#{program_name} #{PatienceDiff::VERSION}"
     
     opt :debug, "Debugging mode"
     opt :context, "Lines of context", :default => 3
