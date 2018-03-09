@@ -1,0 +1,34 @@
+AllCops:
+  TargetRubyVersion: 2.3
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 200
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/ClassLength:
+  Max: 1000
+
+Metrics/CyclomaticComplexity:
+  Max: 15
+
+Layout/IndentHash:
+  EnforcedStyle: consistent
+
+# this is not explicit in the style guide and I find it reads better
+Style/SpaceInsidePercentLiteralDelimiters:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+# Doesn't work well with trollop option style
+Style/BracesAroundHashParameters:
+  Enabled: false
+
+Style/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
