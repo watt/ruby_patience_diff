@@ -27,33 +27,33 @@ module PatienceDiff
       def render_header(*args)
         left_header, right_header = *super(*args)
         helper = HeaderHelper.new(left_header, right_header, @names.count - 1)
-        template("html_header.erb").evaluate(helper)
+        template('html_header.erb').evaluate(helper)
       end
 
       def render_hunk(a, b, opcodes, last_hunk_end)
         helper = hunk_context(a, b, render_hunk_marker(opcodes), opcodes, last_hunk_end)
-        template("html_hunk.erb").evaluate(helper)
+        template('html_hunk.erb').evaluate(helper)
       end
 
       # Render a single file as if it were a diff with no changes & full context
       def render_orphan(sequence, name, timestamp)
         @names << name
-        left_header = "--- New file"
+        left_header = '--- New file'
         right_header = right_header_line(name, timestamp)
         helper = HeaderHelper.new(left_header, right_header, @names.count - 1)
-        result = template("html_header.erb").evaluate(helper)
+        result = template('html_header.erb').evaluate(helper)
 
         # create one opcode with the entire content
         opcodes = [
           [:equal, 0, sequence.length-1, 0, sequence.length-1]
         ]
         helper = hunk_context(sequence, sequence, nil, opcodes, 0)
-        result << template("html_hunk.erb").evaluate(helper)
+        result << template('html_hunk.erb').evaluate(helper)
         result
       end
 
       private
-      def template(filename = "html.erb")
+      def template(filename = 'html.erb')
         @erbs[template_path(filename)]
       end
 

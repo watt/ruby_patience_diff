@@ -3,7 +3,7 @@ require 'English'
 require 'pathname'
 require 'trollop'
 
-lib_path = Pathname(File.join(File.dirname(__FILE__),"..","lib")).realpath
+lib_path = Pathname(File.join(File.dirname(__FILE__),'..','lib')).realpath
 $LOAD_PATH.unshift(lib_path)
 require 'patience_diff'
 
@@ -17,10 +17,10 @@ begin
 
     version "#{program_name} #{PatienceDiff::VERSION}"
 
-    opt :debug, "Debugging mode"
-    opt :context, "Lines of context", :default => 3
+    opt :debug, 'Debugging mode'
+    opt :context, 'Lines of context', :default => 3
     opt :all_context, "Don't collapse common sections; output entire files. Ignored in html format."
-    opt :format, "Specify output format. Currently 'text' and 'html' are supported.", :default => "text"
+    opt :format, "Specify output format. Currently 'text' and 'html' are supported.", :default => 'text'
     opt :ignore_whitespace,
       "Ignore trailing whitespace, and treat leading whitespace as either present or not. This switch is for compatibility with diff's -b option.",
       :short => '-b'

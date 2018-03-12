@@ -20,8 +20,8 @@ module PatienceDiff
 
     def render_header(left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
       @names << right_name
-      @left_name = left_name || "Original"
-      @right_name = right_name || "Current"
+      @left_name = left_name || 'Original'
+      @right_name = right_name || 'Current'
       @left_timestamp = left_timestamp || Time.now
       @right_timestamp = right_timestamp || Time.now
       [
@@ -36,7 +36,7 @@ module PatienceDiff
       b_start = opcodes.first[3] + 1
       b_end = opcodes.last[4] + 2
 
-      "@@ -%d,%d +%d,%d @@" % [a_start, a_end-a_start, b_start, b_end-b_start]
+      '@@ -%d,%d +%d,%d @@' % [a_start, a_end-a_start, b_start, b_end-b_start]
     end
 
     def render_hunk(a, b, opcodes, last_line_shown)
@@ -56,11 +56,11 @@ module PatienceDiff
 
     private
     def left_header_line(name, timestamp)
-      "--- %s\t%s" % [name, timestamp.strftime("%Y-%m-%d %H:%m:%S.%N %z")]
+      "--- %s\t%s" % [name, timestamp.strftime('%Y-%m-%d %H:%m:%S.%N %z')]
     end
 
     def right_header_line(name, timestamp)
-      "+++ %s\t%s" % [name, timestamp.strftime("%Y-%m-%d %H:%m:%S.%N %z")]
+      "+++ %s\t%s" % [name, timestamp.strftime('%Y-%m-%d %H:%m:%S.%N %z')]
     end
   end
 end
