@@ -10,5 +10,5 @@ PatienceDiff.autoload(:Html, 'patience_diff/html/formatter')
 
 module PatienceDiff
   VERSION = '1.1.0'
-  TEMPLATE_PATH = Pathname(File.join(File.dirname(__FILE__),'..','templates')).realpath
+  TEMPLATE_PATH = Pathname(File.join(File.dirname(__FILE__), '..', 'templates')).realpath
 end

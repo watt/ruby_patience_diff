@@ -29,7 +29,7 @@ module PatienceDiff
 
           code, a_start, a_end, b_start, b_end = *opcode
 
-          if (a_start.zero? and b_start.zero?) or (a_end == a.length-1 and b_end == b.length-1)
+          if (a_start.zero? and b_start.zero?) or (a_end == a.length - 1 and b_end == b.length - 1)
             threshold = @context
           else
             threshold = @context * 2
@@ -87,16 +87,16 @@ module PatienceDiff
       opcodes = []
       sequences.each do |(i, j, len)|
         if a_pos < i
-          opcodes << [:delete, a_pos, i-1, b_pos, b_pos]
+          opcodes << [:delete, a_pos, i - 1, b_pos, b_pos]
         end
         if b_pos < j
-          opcodes << [:insert, a_pos, a_pos, b_pos, j-1]
+          opcodes << [:insert, a_pos, a_pos, b_pos, j - 1]
         end
         if len > 0
-          opcodes << [:equal, i, i+len-1, j, j+len-1]
+          opcodes << [:equal, i, i + len - 1, j, j + len - 1]
         end
-        a_pos = i+len
-        b_pos = j+len
+        a_pos = i + len
+        b_pos = j + len
       end
       opcodes
     end
@@ -120,8 +120,8 @@ module PatienceDiff
         # recurse betwen unique lines
         a_pos += a_lo
         b_pos += b_lo
-        if (last_a_pos+1 != a_pos) or (last_b_pos+1 != b_pos)
-          recursively_match(a, b, last_a_pos+1, last_b_pos+1, a_pos, b_pos) { |match| yield match }
+        if (last_a_pos + 1 != a_pos) or (last_b_pos + 1 != b_pos)
+          recursively_match(a, b, last_a_pos + 1, last_b_pos + 1, a_pos, b_pos) { |match| yield match }
         end
         last_a_pos = a_pos
         last_b_pos = b_pos
@@ -131,7 +131,7 @@ module PatienceDiff
       if last_a_pos >= a_lo or last_b_pos >= b_lo
         # there was at least one match
         # recurse between last match and end
-        recursively_match(a, b, last_a_pos+1, last_b_pos+1, a_hi, b_hi) { |match| yield match }
+        recursively_match(a, b, last_a_pos + 1, last_b_pos + 1, a_hi, b_hi) { |match| yield match }
       elsif a[a_lo] == b[b_lo]
         # no unique lines
         # diff forward from beginning
@@ -141,18 +141,18 @@ module PatienceDiff
           b_lo += 1
         end
         recursively_match(a, b, a_lo, b_lo, a_hi, b_hi) { |match| yield match }
-      elsif a[a_hi-1] == b[b_hi-1]
+      elsif a[a_hi - 1] == b[b_hi - 1]
         # no unique lines
         # diff back from end
         a_mid = a_hi - 1
         b_mid = b_hi - 1
-        while a_mid > a_lo and b_mid > b_lo and a[a_mid-1] == b[b_mid-1]
+        while a_mid > a_lo and b_mid > b_lo and a[a_mid - 1] == b[b_mid - 1]
           a_mid -= 1
           b_mid -= 1
         end
         recursively_match(a, b, a_lo, b_lo, a_mid, b_mid) { |match| yield match }
-        (0...(a_hi-a_mid)).each do |i|
-          yield [a_mid+i, b_mid+i]
+        (0...(a_hi - a_mid)).each do |i|
+          yield [a_mid + i, b_mid + i]
         end
       end
     end
@@ -221,13 +221,13 @@ module PatienceDiff
         if piles.any? and piles.last.value < card_value
           pile = piles.size
         elsif piles.any? and piles[pile].value < card_value and
-              (pile == piles.size-1 or piles[pile+1].value > card_value)
+              (pile == piles.size - 1 or piles[pile + 1].value > card_value)
           pile += 1
         else
           pile = bisect(piles, card_value)
         end
 
-        card.previous = piles[pile-1] if pile > 0
+        card.previous = piles[pile - 1] if pile > 0
 
         if pile < piles.size
           #puts "putting card #{card.value} on pile #{pile}"
@@ -245,7 +245,7 @@ module PatienceDiff
       low = 0
       high = piles.size - 1
       while (low <= high)
-        mid = (low + high)/2
+        mid = (low + high) / 2
         if piles[mid].value < target
           low = mid + 1
         else

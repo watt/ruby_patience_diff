@@ -47,7 +47,7 @@ module PatienceDiff
 
         # create one opcode with the entire content
         opcodes = [
-          [:equal, 0, sequence.length-1, 0, sequence.length-1]
+          [:equal, 0, sequence.length - 1, 0, sequence.length - 1]
         ]
         helper = hunk_context(sequence, sequence, nil, opcodes, 0)
         result << template('html_hunk.erb').evaluate(helper)

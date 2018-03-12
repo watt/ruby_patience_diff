@@ -38,7 +38,7 @@ module PatienceDiff
       b_start = opcodes.first[3] + 1
       b_end = opcodes.last[4] + 2
 
-      '@@ -%d,%d +%d,%d @@' % [a_start, a_end-a_start, b_start, b_end-b_start]
+      '@@ -%d,%d +%d,%d @@' % [a_start, a_end - a_start, b_start, b_end - b_start]
     end
 
     def render_hunk(a, b, opcodes, last_line_shown)

@@ -6,7 +6,7 @@ require 'English'
 require 'pathname'
 require 'trollop'
 
-lib_path = Pathname(File.join(File.dirname(__FILE__),'..','lib')).realpath
+lib_path = Pathname(File.join(File.dirname(__FILE__), '..', 'lib')).realpath
 $LOAD_PATH.unshift(lib_path)
 require 'patience_diff'
 
