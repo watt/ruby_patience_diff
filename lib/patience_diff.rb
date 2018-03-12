@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'pathname'
 require 'patience_diff/differ'
 require 'patience_diff/formatter'

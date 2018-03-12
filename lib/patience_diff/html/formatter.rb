@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'patience_diff/formatter'
 require 'patience_diff/formatting_context'
 require 'patience_diff/html/header_helper'

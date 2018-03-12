@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module PatienceDiff
   # Matches indexed data (generally text) using the Patience diff algorithm.
   class SequenceMatcher

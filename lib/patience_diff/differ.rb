@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'English'
 require 'patience_diff/formatter'
 require 'patience_diff/sequence_matcher'

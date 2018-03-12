@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'patience_diff/formatting_context'
 
 module PatienceDiff
