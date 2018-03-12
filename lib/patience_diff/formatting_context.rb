@@ -15,11 +15,11 @@ module PatienceDiff
       @out.print @differ.diff_files(left_file, right_file, @formatter)
     end
 
-    def sequences(left, right, left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil)
+    def sequences(left, right, left_name = nil, right_name = nil, left_timestamp = nil, right_timestamp = nil)
       @out.print @differ.diff_sequences(left, right, left_name, right_name, left_timestamp, right_timestamp, @formatter)
     end
 
-    def orphan(sequence, name=nil, timestamp=nil)
+    def orphan(sequence, name = nil, timestamp = nil)
       @out.print @formatter.render_orphan(sequence, name, timestamp)
     end
 

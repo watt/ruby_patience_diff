@@ -29,7 +29,7 @@ module PatienceDiff
 
           code, a_start, a_end, b_start, b_end = *opcode
 
-          if (a_start.zero? and b_start.zero?) or (a_end == a.length - 1 and b_end == b.length - 1)
+          if (a_start.zero? && b_start.zero?) || (a_end == a.length - 1 && b_end == b.length - 1)
             threshold = @context
           else
             threshold = @context * 2
@@ -58,7 +58,7 @@ module PatienceDiff
         end
         last_group << opcode
       end
-      groups << last_group unless last_group.one? and last_group.first[0] == :equal
+      groups << last_group unless last_group.one? && last_group.first[0] == :equal
       groups
     end
 
@@ -102,6 +102,7 @@ module PatienceDiff
     end
 
     private
+
     def match(a, b)
       matches = []
       recursively_match(a, b, 0, 0, a.length, b.length) do |match|
@@ -111,7 +112,7 @@ module PatienceDiff
     end
 
     def recursively_match(a, b, a_lo, b_lo, a_hi, b_hi)
-      return if a_lo == a_hi or b_lo == b_hi
+      return if a_lo == a_hi || b_lo == b_hi
 
       last_a_pos = a_lo - 1
       last_b_pos = b_lo - 1
@@ -120,7 +121,7 @@ module PatienceDiff
         # recurse betwen unique lines
         a_pos += a_lo
         b_pos += b_lo
-        if (last_a_pos + 1 != a_pos) or (last_b_pos + 1 != b_pos)
+        if (last_a_pos + 1 != a_pos) || (last_b_pos + 1 != b_pos)
           recursively_match(a, b, last_a_pos + 1, last_b_pos + 1, a_pos, b_pos) { |match| yield match }
         end
         last_a_pos = a_pos
@@ -128,14 +129,14 @@ module PatienceDiff
         yield [a_pos, b_pos]
       end
 
-      if last_a_pos >= a_lo or last_b_pos >= b_lo
+      if last_a_pos >= a_lo || last_b_pos >= b_lo
         # there was at least one match
         # recurse between last match and end
         recursively_match(a, b, last_a_pos + 1, last_b_pos + 1, a_hi, b_hi) { |match| yield match }
       elsif a[a_lo] == b[b_lo]
         # no unique lines
         # diff forward from beginning
-        while a_lo < a_hi and b_lo < b_hi and a[a_lo] == b[b_lo]
+        while a_lo < a_hi && b_lo < b_hi && a[a_lo] == b[b_lo]
           yield [a_lo, b_lo]
           a_lo += 1
           b_lo += 1
@@ -146,7 +147,7 @@ module PatienceDiff
         # diff back from end
         a_mid = a_hi - 1
         b_mid = b_hi - 1
-        while a_mid > a_lo and b_mid > b_lo and a[a_mid - 1] == b[b_mid - 1]
+        while a_mid > a_lo && b_mid > b_lo && a[a_mid - 1] == b[b_mid - 1]
           a_mid -= 1
           b_mid -= 1
         end
@@ -160,10 +161,10 @@ module PatienceDiff
     def collapse_matches(matches)
       return [] if matches.empty?
       sequences = []
-      start_a, start_b = *(matches.first)
+      start_a, start_b = *matches.first
       len = 1
       matches[1..-1].each do |(i_a, i_b)|
-        if i_a == start_a + len and i_b == start_b + len
+        if i_a == start_a + len && i_b == start_b + len
           len += 1
         else
           sequences << [start_a, start_b, len]
@@ -182,7 +183,7 @@ module PatienceDiff
       unique_b = {}
 
       a.each_with_index do |val, index|
-        if unique_a.has_key? val
+        if unique_a.key? val
           unique_a[val] = nil
         else
           unique_a[val] = index
@@ -218,22 +219,20 @@ module PatienceDiff
         next if card_value.nil?
         card = Card.new(index, card_value)
 
-        if piles.any? and piles.last.value < card_value
+        if piles.any? && piles.last.value < card_value
           pile = piles.size
-        elsif piles.any? and piles[pile].value < card_value and
-              (pile == piles.size - 1 or piles[pile + 1].value > card_value)
+        elsif piles.any? && piles[pile].value < card_value &&
+              (pile == piles.size - 1 || piles[pile + 1].value > card_value)
           pile += 1
         else
           pile = bisect(piles, card_value)
         end
 
-        card.previous = piles[pile - 1] if pile > 0
+        card.previous = piles[pile - 1] if pile.positive?
 
         if pile < piles.size
-          #puts "putting card #{card.value} on pile #{pile}"
           piles[pile] = card
         else
-          #puts "putting card #{card.value} on new pile"
           piles << card
         end
       end
@@ -244,7 +243,7 @@ module PatienceDiff
     def bisect(piles, target)
       low = 0
       high = piles.size - 1
-      while (low <= high)
+      while low <= high
         mid = (low + high) / 2
         if piles[mid].value < target
           low = mid + 1

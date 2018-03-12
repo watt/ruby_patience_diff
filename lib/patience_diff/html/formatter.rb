@@ -9,7 +9,6 @@ require 'erubis'
 
 module PatienceDiff
   module Html
-
     # Produces a fancy HTML-formatted unified diff. All your friends will be jealous.
     class Formatter < PatienceDiff::Formatter
       def initialize(*args)
@@ -55,6 +54,7 @@ module PatienceDiff
       end
 
       private
+
       def template(filename = 'html.erb')
         @erbs[template_path(filename)]
       end
@@ -64,7 +64,7 @@ module PatienceDiff
         File.join(PatienceDiff::TEMPLATE_PATH, filename)
       end
 
-      def hunk_context(a, b, hunk_marker, opcodes, last_hunk_end)
+      def hunk_context(a, b, _hunk_marker, opcodes, last_hunk_end)
         @hunk_count += 1
         HunkHelper.new(a, b, render_hunk_marker(opcodes), opcodes, last_hunk_end, @hunk_count)
       end

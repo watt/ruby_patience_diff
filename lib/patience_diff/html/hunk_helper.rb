@@ -43,6 +43,7 @@ module PatienceDiff
       end
 
       private
+
       # override for additional behavior, e.g. syntax highlighting
       def format_line(line)
         escape(line)

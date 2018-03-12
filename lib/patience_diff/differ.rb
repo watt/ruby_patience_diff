@@ -23,10 +23,10 @@ module PatienceDiff
     end
 
     # Generates a unified diff from the contents of the files at the paths specified.
-    def diff_files(left_file, right_file, formatter=Formatter.new)
+    def diff_files(left_file, right_file, formatter = Formatter.new)
       (left_data, left_timestamp), (right_data, right_timestamp) = [left_file, right_file].map do |filename|
         # Read in binary encoding, so that we can diff any encoding and split() won't complain
-        File.open(filename, :external_encoding => Encoding::BINARY) do |file|
+        File.open(filename, external_encoding: Encoding::BINARY) do |file|
           [file.read.split($RS), file.mtime]
         end
       end
@@ -35,7 +35,7 @@ module PatienceDiff
 
     # Generate a unified diff of the data specified. The left and right values should be strings, or any other indexable, sortable data.
     # File names and timestamps do not affect the diff algorithm, but are used in the header text.
-    def diff_sequences(left, right, left_name=nil, right_name=nil, left_timestamp=nil, right_timestamp=nil, formatter=Formatter.new)
+    def diff_sequences(left, right, left_name = nil, right_name = nil, left_timestamp = nil, right_timestamp = nil, formatter = Formatter.new)
       if @ignore_whitespace
         a = left.map  { |line| line.rstrip.gsub(/^\s+/, ' ') }
         b = right.map { |line| line.rstrip.gsub(/^\s+/, ' ') }
@@ -44,11 +44,7 @@ module PatienceDiff
         b = right
       end
 
-      if @all_context
-        hunks = [@matcher.diff_opcodes(a, b)]
-      else
-        hunks = @matcher.grouped_opcodes(a, b)
-      end
+      hunks = @all_context ? [@matcher.diff_opcodes(a, b)] : @matcher.grouped_opcodes(a, b)
 
       return nil unless hunks.any?
 
