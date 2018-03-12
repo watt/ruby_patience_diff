@@ -2,15 +2,15 @@ module PatienceDiff
   # Matches indexed data (generally text) using the Patience diff algorithm.
   class SequenceMatcher
     attr_accessor :context
-    
+
     Card = Struct.new(:index, :value, :previous)
-    
+
     # Options:
     #   * :context: number of lines of context to use when grouping
     def initialize(opts = {})
       @context = opts[:context] || 3
     end
-    
+
     # Generate a diff of a and b using #diff_opcodes, and split the opcode into groups
     # whenever an :equal range is encountered that is longer than @context * 2.
     # Returns an array of arrays of 5-tuples as described for #diff_opcodes.
@@ -24,15 +24,15 @@ module PatienceDiff
             last_group = []
             next
           end
-          
+
           code, a_start, a_end, b_start, b_end = *opcode
-          
+
           if (a_start.zero? and b_start.zero?) or (a_end == a.length-1 and b_end == b.length-1)
             threshold = @context
           else
             threshold = @context * 2
           end
-          
+
           if (b_end - b_start + 1) > threshold
             unless last_group.empty?
               last_group << [
@@ -46,7 +46,7 @@ module PatienceDiff
               last_group = []
             end
             opcode = [
-              code, 
+              code,
               a_end - @context + 1,
               a_end,
               b_end - @context + 1,
@@ -59,7 +59,7 @@ module PatienceDiff
       groups << last_group unless last_group.one? and last_group.first[0] == :equal
       groups
     end
-    
+
     # Generate a diff of a and b, and return an array of opcodes describing that diff.
     # Each opcode represents a range in a and b that is either equal, only in a,
     # or only in b. Opcodes are 5-tuples, in the format:
@@ -80,7 +80,7 @@ module PatienceDiff
     def diff_opcodes(a, b)
       sequences = collapse_matches(match(a, b))
       sequences << [a.length, b.length, 0]
-  
+
       a_pos = b_pos = 0
       opcodes = []
       sequences.each do |(i, j, len)|
@@ -98,7 +98,7 @@ module PatienceDiff
       end
       opcodes
     end
-      
+
     private
     def match(a, b)
       matches = []
@@ -107,13 +107,13 @@ module PatienceDiff
       end
       matches
     end
-    
+
     def recursively_match(a, b, a_lo, b_lo, a_hi, b_hi)
       return if a_lo == a_hi or b_lo == b_hi
 
       last_a_pos = a_lo - 1
       last_b_pos = b_lo - 1
-      
+
       longest_unique_subsequence(a[a_lo...a_hi], b[b_lo...b_hi]).each do |(a_pos, b_pos)|
         # recurse betwen unique lines
         a_pos += a_lo
@@ -125,7 +125,7 @@ module PatienceDiff
         last_b_pos = b_pos
         yield [a_pos, b_pos]
       end
-      
+
       if last_a_pos >= a_lo or last_b_pos >= b_lo
         # there was at least one match
         # recurse between last match and end
@@ -154,7 +154,7 @@ module PatienceDiff
         end
       end
     end
-    
+
     def collapse_matches(matches)
       return [] if matches.empty?
       sequences = []
@@ -173,12 +173,12 @@ module PatienceDiff
       sequences << [start_a, start_b, len]
       sequences
     end
-  
+
     def longest_unique_subsequence(a, b)
       deck = Array.new(b.length)
       unique_a = {}
       unique_b = {}
-      
+
       a.each_with_index do |val, index|
         if unique_a.has_key? val
           unique_a[val] = nil
@@ -186,7 +186,7 @@ module PatienceDiff
           unique_a[val] = index
         end
       end
-      
+
       b.each_with_index do |val, index|
         a_index = unique_a[val]
         next unless a_index
@@ -199,7 +199,7 @@ module PatienceDiff
           deck[index] = a_index
         end
       end
-      
+
       card = patience_sort(deck).last
       result = []
       while card
@@ -208,25 +208,25 @@ module PatienceDiff
       end
       result
     end
-  
+
     def patience_sort(deck)
       piles = []
       pile = 0
       deck.each_with_index do |card_value, index|
         next if card_value.nil?
         card = Card.new(index, card_value)
-        
+
         if piles.any? and piles.last.value < card_value
           pile = piles.size
-        elsif piles.any? and piles[pile].value < card_value and 
+        elsif piles.any? and piles[pile].value < card_value and
               (pile == piles.size-1 or piles[pile+1].value > card_value)
           pile += 1
         else
           pile = bisect(piles, card_value)
         end
-        
+
         card.previous = piles[pile-1] if pile > 0
-        
+
         if pile < piles.size
           #puts "putting card #{card.value} on pile #{pile}"
           piles[pile] = card
@@ -235,10 +235,10 @@ module PatienceDiff
           piles << card
         end
       end
-      
+
       piles
     end
-    
+
     def bisect(piles, target)
       low = 0
       high = piles.size - 1

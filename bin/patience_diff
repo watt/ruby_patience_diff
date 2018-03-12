@@ -14,20 +14,20 @@ begin
       Usage: #{program_name} [options] left-file right-file (left-file-2 right-file-2 ...)
       Options:
     EOF
-    
+
     version "#{program_name} #{PatienceDiff::VERSION}"
-    
+
     opt :debug, "Debugging mode"
     opt :context, "Lines of context", :default => 3
     opt :all_context, "Don't collapse common sections; output entire files. Ignored in html format."
     opt :format, "Specify output format. Currently 'text' and 'html' are supported.", :default => "text"
-    opt :ignore_whitespace, 
+    opt :ignore_whitespace,
       "Ignore trailing whitespace, and treat leading whitespace as either present or not. This switch is for compatibility with diff's -b option.",
       :short => '-b'
   end
-  
+
   raise PatienceDiff::UsageError unless ARGV.length and ARGV.length % 2 == 0
-  
+
   differ = PatienceDiff::Differ.new(opts)
   formatter = case opts.delete(:format)
     when 'text'
@@ -37,7 +37,7 @@ begin
     else
       raise PatienceDiff::UsageError
     end.new(differ)
-  
+
   formatter.format do |diff|
     ARGV.each_slice(2) do |(left_file, right_file)|
       diff.files left_file, right_file
@@ -45,7 +45,7 @@ begin
   end.tap do |result|
     print result
   end
-  
+
 rescue PatienceDiff::UsageError => e
   Trollop.module_eval do
     @last_parser.educate($stderr)
