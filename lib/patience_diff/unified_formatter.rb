@@ -6,7 +6,7 @@ module PatienceDiff
     # Yields the formatted diff one line at a time. If a block is not provided,
     # returns an array of all lines instead.
     def format(a:, b:, hunks:, **metadata)
-      return to_enum(:format).to_a unless block_given?
+      return to_enum(:format, a: a, b: b, hunks: hunks, **metadata).to_a unless block_given?
 
       render_header(metadata) { |line| yield line }
       hunks.each do |opcodes|

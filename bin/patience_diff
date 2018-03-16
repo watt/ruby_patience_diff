@@ -2,7 +2,6 @@
 
 # frozen_string_literal: true
 
-require 'English'
 require 'pathname'
 require 'trollop'
 
@@ -10,53 +9,29 @@ lib_path = Pathname(File.join(File.dirname(__FILE__), '..', 'lib')).realpath
 $LOAD_PATH.unshift(lib_path)
 require 'patience_diff'
 
-begin
-  program_name = File.basename($PROGRAM_NAME)
-  opts = Trollop.options do
-    banner <<-EOF.gsub(/^\s*/, '')
-      Usage: #{program_name} [options] left-file right-file (left-file-2 right-file-2 ...)
-      Options:
-    EOF
+program_name = File.basename($PROGRAM_NAME)
+opts = Trollop.options do
+  banner <<-EOF.gsub(/^\s*/, '')
+    Usage: #{program_name} [options] left-file right-file (left-file-2 right-file-2 ...)
+    Options:
+  EOF
 
-    version "#{program_name} #{PatienceDiff::VERSION}"
+  version "#{program_name} #{PatienceDiff::VERSION}"
 
-    opt :debug, 'Debugging mode'
-    opt :context, 'Lines of context', default: 3
-    opt :all_context, "Don't collapse common sections; output entire files. Ignored in html format."
-    opt :format, "Specify output format. Currently 'text' and 'html' are supported.", default: 'text'
-    opt :ignore_whitespace,
-        <<~EOF,
-          Ignore trailing whitespace, and treat leading whitespace as either present or not. This switch
-          is for compatibility with diff's -b option.
-        EOF
-        short: '-b'
-  end
+  opt :context, 'Lines of context', default: 3
+  opt :all_context, "Don't collapse common sections; output entire files."
+  opt :ignore_whitespace,
+      <<~EOF.tr("\n", ' '),
+        Ignore trailing whitespace, and treat leading whitespace as either present or not. This switch
+        is for compatibility with diff's -b option.
+      EOF
+      short: '-b'
+end
 
-  raise PatienceDiff::UsageError unless ARGV.length && ARGV.length.even?
+Trollop.educate($stderr) unless ARGV.length && ARGV.length.even?
 
-  differ = PatienceDiff::Differ.new(opts)
-  formatter =
-    case opts.delete(:format)
-    when 'text'
-      PatienceDiff::Formatter
-    when 'html'
-      PatienceDiff::Html::Formatter
-    else
-      raise PatienceDiff::UsageError
-    end.new(differ)
+differ = PatienceDiff::Differ.new(opts)
 
-  result = formatter.format do |diff|
-    ARGV.each_slice(2) do |(left_file, right_file)|
-      diff.files left_file, right_file
-    end
-  end
-
-  print result
-rescue PatienceDiff::UsageError
-  Trollop.module_eval do
-    @last_parser.educate($stderr)
-  end
-rescue StandardError => e
-  raise if opts[:debug]
-  $stderr.puts "Error: #{e}"
+ARGV.each_slice(2) do |(left_file, right_file)|
+  differ.diff_files(left_file, right_file)
 end

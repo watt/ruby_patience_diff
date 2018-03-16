@@ -2,7 +2,7 @@
 
 module PatienceDiff
   class ContextGrouper
-    def initialize(context: 3)
+    def initialize(context: 3, **)
       @context = context
     end
 
@@ -22,7 +22,7 @@ module PatienceDiff
     private
 
     def split_opcodes(opcodes:)
-      return to_enum(:split_opcodes) unless block_given?
+      return to_enum(:split_opcodes, opcodes: opcodes) unless block_given?
 
       # Handle the first and last opcodes separately.
       first = opcodes.first

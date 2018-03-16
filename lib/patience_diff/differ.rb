@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'English'
-require 'patience_diff/formatter'
+require 'patience_diff/unified_formatter'
 require 'patience_diff/sequence_matcher'
 
 module PatienceDiff
@@ -35,8 +35,8 @@ module PatienceDiff
       diff_sequences(
         left_data,
         right_data,
-        left_file: left_file,
-        right_file: right_file,
+        left_name: left_file,
+        right_name: right_file,
         left_timestamp: left_timestamp,
         right_timestamp: right_timestamp
       )
@@ -72,7 +72,9 @@ module PatienceDiff
         b_name: right_name,
         a_timestamp: left_timestamp,
         b_timestamp: right_timestamp
-      )
+      ) do |line|
+        puts line
+      end
     end
   end
 end
