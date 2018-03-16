@@ -17,61 +17,6 @@ module PatienceDiff
 
     attr_accessor :context
 
-    # Options:
-    #   * :context: number of lines of context to use when grouping
-    def initialize(opts = {})
-      @context = opts[:context] || 3
-    end
-
-    # Generate a diff of a and b using #diff_opcodes, and split the opcode into groups
-    # whenever an :equal range is encountered that is longer than @context * 2.
-    # Returns an array of arrays of 5-tuples as described for #diff_opcodes.
-    def grouped_opcodes(a, b)
-      groups = []
-      last_group = []
-      diff_opcodes(a, b).each do |opcode|
-        if opcode[0] == :equal
-          if @context.zero?
-            groups << last_group
-            last_group = []
-            next
-          end
-
-          code, a_start, a_end, b_start, b_end = *opcode
-
-          if (a_start.zero? && b_start.zero?) || (a_end == a.length - 1 && b_end == b.length - 1)
-            threshold = @context
-          else
-            threshold = @context * 2
-          end
-
-          if (b_end - b_start + 1) > threshold
-            unless last_group.empty?
-              last_group << [
-                code,
-                a_start,
-                a_start + @context - 1,
-                b_start,
-                b_start + @context - 1
-              ]
-              groups << last_group
-              last_group = []
-            end
-            opcode = [
-              code,
-              a_end - @context + 1,
-              a_end,
-              b_end - @context + 1,
-              b_end
-            ]
-          end
-        end
-        last_group << opcode
-      end
-      groups << last_group unless last_group.one? && last_group.first[0] == :equal
-      groups
-    end
-
     # Generate a diff of a and b, and return an array of opcodes describing that diff.
     # Each opcode represents a range in a and b that is either equal, only in a,
     # or only in b. Opcodes are 5-tuples, in the format:
