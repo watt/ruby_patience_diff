@@ -2,7 +2,7 @@
 
 module PatienceDiff
   class ContextGrouper
-    def initialize(context:)
+    def initialize(context: 3)
       @context = context
     end
 

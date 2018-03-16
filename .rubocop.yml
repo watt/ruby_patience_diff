@@ -33,3 +33,7 @@ Style/BracesAroundHashParameters:
 
 Style/MultilineMethodCallIndentation:
   EnforcedStyle: indented
+
+# Avoid conflict with formatter methods named `format`
+Style/FormatString:
+  EnforcedStyle: sprintf
