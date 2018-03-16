@@ -13,8 +13,6 @@ module PatienceDiff
       end
     end
 
-    private_constant :Card
-
     attr_accessor :context
 
     # Generate a diff of a and b, and return an array of opcodes describing that diff.
@@ -35,7 +33,7 @@ module PatienceDiff
     # For :delete, a_start == a_end.
     # For :insert, b_start == b_end.
     def diff_opcodes(a, b)
-      sequences = collapse_matches(match(a, b))
+      sequences = collapse_matches(MatchCollector.new(a, b).match)
       sequences << [a.length, b.length, 0]
 
       a_pos = b_pos = 0
@@ -52,61 +50,6 @@ module PatienceDiff
     end
 
     private
-
-    def match(a, b)
-      matches = []
-      recursively_match(a, b, 0, 0, a.length, b.length) do |match|
-        matches << match
-      end
-      matches
-    end
-
-    def recursively_match(a, b, a_lo, b_lo, a_hi, b_hi)
-      return if a_lo == a_hi || b_lo == b_hi
-
-      last_a_pos = a_lo - 1
-      last_b_pos = b_lo - 1
-
-      longest_unique_subsequence(a[a_lo...a_hi], b[b_lo...b_hi]).each do |(a_pos, b_pos)|
-        # recurse betwen unique lines
-        a_pos += a_lo
-        b_pos += b_lo
-        if (last_a_pos + 1 != a_pos) || (last_b_pos + 1 != b_pos)
-          recursively_match(a, b, last_a_pos + 1, last_b_pos + 1, a_pos, b_pos) { |match| yield match }
-        end
-        last_a_pos = a_pos
-        last_b_pos = b_pos
-        yield [a_pos, b_pos]
-      end
-
-      if last_a_pos >= a_lo || last_b_pos >= b_lo
-        # there was at least one match
-        # recurse between last match and end
-        recursively_match(a, b, last_a_pos + 1, last_b_pos + 1, a_hi, b_hi) { |match| yield match }
-      elsif a[a_lo] == b[b_lo]
-        # no unique lines
-        # diff forward from beginning
-        while a_lo < a_hi && b_lo < b_hi && a[a_lo] == b[b_lo]
-          yield [a_lo, b_lo]
-          a_lo += 1
-          b_lo += 1
-        end
-        recursively_match(a, b, a_lo, b_lo, a_hi, b_hi) { |match| yield match }
-      elsif a[a_hi - 1] == b[b_hi - 1]
-        # no unique lines
-        # diff back from end
-        a_mid = a_hi - 1
-        b_mid = b_hi - 1
-        while a_mid > a_lo && b_mid > b_lo && a[a_mid - 1] == b[b_mid - 1]
-          a_mid -= 1
-          b_mid -= 1
-        end
-        recursively_match(a, b, a_lo, b_lo, a_mid, b_mid) { |match| yield match }
-        (0...(a_hi - a_mid)).each do |i|
-          yield [a_mid + i, b_mid + i]
-        end
-      end
-    end
 
     def collapse_matches(matches)
       return [] if matches.empty?
@@ -127,86 +70,154 @@ module PatienceDiff
       sequences
     end
 
-    def longest_unique_subsequence(a, b)
-      deck = Array.new(b.length)
-      unique_a = {}
-      unique_b = {}
+    class MatchCollector
+      attr_reader :matches
 
-      a.each_with_index do |val, index|
-        unique_a[val] = unique_a.key?(val) ? nil : index
+      def initialize(a, b)
+        @a = a
+        @b = b
+        @matches = []
       end
 
-      b.each_with_index do |val, index|
-        a_index = unique_a[val]
-        next unless a_index
-        dupe_index = unique_b[val]
-        if dupe_index
-          deck[dupe_index] = nil
-          unique_a.delete(val)
+      def match
+        recursively_match(0, 0, @a.length, @b.length)
+        @matches
+      end
+
+      # rubocop:disable Metrics/PerceivedComplexity
+      # deal with it
+      def recursively_match(a_lo, b_lo, a_hi, b_hi)
+        return if a_lo == a_hi || b_lo == b_hi
+
+        last_a_pos = a_lo - 1
+        last_b_pos = b_lo - 1
+
+        longest_unique_subsequence(@a[a_lo...a_hi], @b[b_lo...b_hi]).each do |(a_pos, b_pos)|
+          # recurse betwen unique lines
+          a_pos += a_lo
+          b_pos += b_lo
+          if (last_a_pos + 1 != a_pos) || (last_b_pos + 1 != b_pos)
+            recursively_match(last_a_pos + 1, last_b_pos + 1, a_pos, b_pos)
+          end
+          last_a_pos = a_pos
+          last_b_pos = b_pos
+          @matches << [a_pos, b_pos]
+        end
+
+        if last_a_pos >= a_lo || last_b_pos >= b_lo
+          # there was at least one match
+          # recurse between last match and end
+          recursively_match(last_a_pos + 1, last_b_pos + 1, a_hi, b_hi)
+        elsif @a[a_lo] == @b[b_lo]
+          # no unique lines
+          # diff forward from beginning
+          while a_lo < a_hi && b_lo < b_hi && @a[a_lo] == @b[b_lo]
+            @matches << [a_lo, b_lo]
+            a_lo += 1
+            b_lo += 1
+          end
+          recursively_match(a_lo, b_lo, a_hi, b_hi)
+        elsif @a[a_hi - 1] == @b[b_hi - 1]
+          # no unique lines
+          # diff back from end
+          a_mid = a_hi - 1
+          b_mid = b_hi - 1
+          while a_mid > a_lo && b_mid > b_lo && @a[a_mid - 1] == @b[b_mid - 1]
+            a_mid -= 1
+            b_mid -= 1
+          end
+          recursively_match(a_lo, b_lo, a_mid, b_mid)
+          (0...(a_hi - a_mid)).each do |i|
+            @matches << [a_mid + i, b_mid + i]
+          end
+        end
+      end
+      # rubocop:enable Metrics/PerceivedComplexity
+
+      def longest_unique_subsequence(a, b)
+        deck = Array.new(b.length)
+        unique_a = {}
+        unique_b = {}
+
+        a.each_with_index do |val, index|
+          unique_a[val] = unique_a.key?(val) ? nil : index
+        end
+
+        b.each_with_index do |val, index|
+          a_index = unique_a[val]
+          next unless a_index
+          dupe_index = unique_b[val]
+          if dupe_index
+            deck[dupe_index] = nil
+            unique_a.delete(val)
+          else
+            unique_b[val] = index
+            deck[index] = a_index
+          end
+        end
+
+        card = patience_sort(deck).last
+        result = []
+        while card
+          result.unshift [card.value, card.index]
+          card = card.previous
+        end
+        result
+      end
+
+      def patience_sort(deck)
+        piles = []
+        pile = 0
+        deck.each_with_index do |card_value, index|
+          next if card_value.nil?
+
+          pile = pick_pile(piles: piles, card_value: card_value, last_pile: pile)
+
+          card = Card.new(
+            index: index,
+            value: card_value,
+            previous: pile.positive? ? piles[pile - 1] : nil
+          )
+
+          if pile < piles.size
+            piles[pile] = card
+          else
+            piles << card
+          end
+        end
+
+        piles
+      end
+
+      def pick_pile(piles:, card_value:, last_pile:)
+        return 0 if piles.empty?
+
+        if piles.last.value < card_value
+          piles.size
+        elsif piles[last_pile].value < card_value &&
+              (last_pile == piles.size - 1 || piles[last_pile + 1].value > card_value)
+          last_pile + 1
         else
-          unique_b[val] = index
-          deck[index] = a_index
+          bisect(piles, card_value)
         end
       end
 
-      card = patience_sort(deck).last
-      result = []
-      while card
-        result.unshift [card.value, card.index]
-        card = card.previous
-      end
-      result
-    end
-
-    def patience_sort(deck)
-      piles = []
-      pile = 0
-      deck.each_with_index do |card_value, index|
-        next if card_value.nil?
-
-        pile = pick_pile(piles: piles, card_value: card_value, last_pile: pile)
-
-        card = Card.new(
-          index: index,
-          value: card_value,
-          previous: pile.positive? ? piles[pile - 1] : nil
-        )
-
-        if pile < piles.size
-          piles[pile] = card
-        else
-          piles << card
+      def bisect(piles, target)
+        low = 0
+        high = piles.size - 1
+        while low <= high
+          mid = (low + high) / 2
+          if piles[mid].value < target
+            low = mid + 1
+          else
+            high = mid - 1
+          end
         end
-      end
-
-      piles
-    end
-
-    def pick_pile(piles:, card_value:, last_pile:)
-      return 0 if piles.empty?
-
-      if piles.last.value < card_value
-        piles.size
-      elsif piles[last_pile].value < card_value &&
-            (last_pile == piles.size - 1 || piles[last_pile + 1].value > card_value)
-        last_pile + 1
-      else
-        bisect(piles, card_value)
+        low
       end
     end
 
-    def bisect(piles, target)
-      low = 0
-      high = piles.size - 1
-      while low <= high
-        mid = (low + high) / 2
-        if piles[mid].value < target
-          low = mid + 1
-        else
-          high = mid - 1
-        end
-      end
-      low
-    end
+    private_constant :Card
+    private_constant :MatchCollector
   end
 end

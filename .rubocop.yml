@@ -21,7 +21,7 @@ Layout/IndentHash:
   EnforcedStyle: consistent
 
 # this is not explicit in the style guide and I find it reads better
-Style/SpaceInsidePercentLiteralDelimiters:
+Layout/SpaceInsidePercentLiteralDelimiters:
   Enabled: false
 
 Style/Documentation:
@@ -31,7 +31,7 @@ Style/Documentation:
 Style/BracesAroundHashParameters:
   Enabled: false
 
-Style/MultilineMethodCallIndentation:
+Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
 
 # Avoid conflict with formatter methods named `format`
