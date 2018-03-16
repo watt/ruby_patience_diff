@@ -1,8 +1,6 @@
-# ruby_patience_diff
+# README
 
-* http://github.com/watt/ruby_patience_diff
-
-## DESCRIPTION:
+## Description
 
 A Ruby implementation of the Patience diff algorithm.
 
@@ -13,11 +11,11 @@ Patience diff was originally written by Bram Cohen and is used in the [Bazaar][b
 [example]: http://alfedenzo.livejournal.com/170301.html
 [bazaar]: http://bazaar.canonical.com/
 
-## INSTALL:
+## Installation
 
     $ gem install patience_diff
 
-## USAGE:
+## Usage
 
 ### Command line:
 
@@ -25,17 +23,46 @@ Patience diff was originally written by Bram Cohen and is used in the [Bazaar][b
 
 Run with `--help` to see available options.
 
-### Programmatically:
+### Programmatically
 
-    left = File.read("/path/to/old").split($RS)
-    left_timestamp = File.mtime("/path/to/old")
-    right = File.read("/path/to/new").split($RS)
-    right_timestamp = File.mtime("/path/to/new")
+Diff files to stdout:
 
-    differ = PatienceDiff::UnifiedDiffer.new(:context => 10)
-    puts differ.diff(left, right, left_file, right_file, left_timestamp, right_timestamp)
+    differ = PatienceDiff::Differ.new
+    differ.diff_files("/path/to/left", "path/to/right")
 
-## LICENSE:
+Diff arrays to stdout:
+
+    # name and timestamp metadata is optional
+    differ.diff_sequences(
+      left_array,
+      right_array,
+      left_name: left_filename,
+      right_name: right_filename,
+      left_timestamp: left_timestamp,
+      right_timestamp: right_timestamp
+    )
+
+Manual diff processing:
+
+    matcher = PatienceDiff::SequenceMatcher.new
+    opcodes = matcher.diff_opcodes(left, right)
+    opcodes.each do |(code, a_start, a_end, b_start, b_end)|
+      case code
+      when :equal
+        puts 'Equal range:'
+        puts b[b_start..b_end].map { |line| ' ' + line }
+      when :delete
+        puts 'Deleted:'
+        puts a[a_start..a_end].map { |line| '-' + line }
+      when :insert
+        puts 'Inserted:'
+        puts b[b_start..b_end].map { |line| '+' + line }
+      end
+    end
+
+See `SequenceMatcher.rb` for documentation of diff opcodes.
+
+## License
 
 (The MIT License)
 
