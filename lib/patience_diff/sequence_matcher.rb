@@ -3,9 +3,19 @@
 module PatienceDiff
   # Matches indexed data (generally text) using the Patience diff algorithm.
   class SequenceMatcher
-    attr_accessor :context
+    class Card
+      attr_accessor :index, :value, :previous
 
-    Card = Struct.new(:index, :value, :previous)
+      def initialize(index:, value:, previous:)
+        @index = index
+        @value = value
+        @previous = previous
+      end
+    end
+
+    private_constant :Card
+
+    attr_accessor :context
 
     # Options:
     #   * :context: number of lines of context to use when grouping
@@ -86,15 +96,10 @@ module PatienceDiff
       a_pos = b_pos = 0
       opcodes = []
       sequences.each do |(i, j, len)|
-        if a_pos < i
-          opcodes << [:delete, a_pos, i - 1, b_pos, b_pos]
-        end
-        if b_pos < j
-          opcodes << [:insert, a_pos, a_pos, b_pos, j - 1]
-        end
-        if len > 0
-          opcodes << [:equal, i, i + len - 1, j, j + len - 1]
-        end
+        opcodes << [:delete, a_pos, i - 1, b_pos, b_pos] if a_pos < i
+        opcodes << [:insert, a_pos, a_pos, b_pos, j - 1] if b_pos < j
+        opcodes << [:equal, i, i + len - 1, j, j + len - 1] if len.positive?
+
         a_pos = i + len
         b_pos = j + len
       end
@@ -183,11 +188,7 @@ module PatienceDiff
       unique_b = {}
 
       a.each_with_index do |val, index|
-        if unique_a.key? val
-          unique_a[val] = nil
-        else
-          unique_a[val] = index
-        end
+        unique_a[val] = unique_a.key?(val) ? nil : index
       end
 
       b.each_with_index do |val, index|
@@ -217,18 +218,14 @@ module PatienceDiff
       pile = 0
       deck.each_with_index do |card_value, index|
         next if card_value.nil?
-        card = Card.new(index, card_value)
 
-        if piles.any? && piles.last.value < card_value
-          pile = piles.size
-        elsif piles.any? && piles[pile].value < card_value &&
-              (pile == piles.size - 1 || piles[pile + 1].value > card_value)
-          pile += 1
-        else
-          pile = bisect(piles, card_value)
-        end
+        pile = pick_pile(piles: piles, card_value: card_value, last_pile: pile)
 
-        card.previous = piles[pile - 1] if pile.positive?
+        card = Card.new(
+          index: index,
+          value: card_value,
+          previous: pile.positive? ? piles[pile - 1] : nil
+        )
 
         if pile < piles.size
           piles[pile] = card
@@ -238,6 +235,19 @@ module PatienceDiff
       end
 
       piles
+    end
+
+    def pick_pile(piles:, card_value:, last_pile:)
+      return 0 if piles.empty?
+
+      if piles.last.value < card_value
+        piles.size
+      elsif piles[last_pile].value < card_value &&
+            (last_pile == piles.size - 1 || piles[last_pile + 1].value > card_value)
+        last_pile + 1
+      else
+        bisect(piles, card_value)
+      end
     end
 
     def bisect(piles, target)
