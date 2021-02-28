@@ -47,7 +47,7 @@ begin
   end
 
 rescue PatienceDiff::UsageError => e
-  Trollop.module_eval do
+  Optimist.module_eval do
     @last_parser.educate($stderr)
   end
 rescue StandardError => e
